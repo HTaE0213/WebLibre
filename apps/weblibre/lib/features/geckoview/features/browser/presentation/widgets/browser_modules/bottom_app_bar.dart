@@ -616,6 +616,8 @@ class BrowserTabBar extends HookConsumerWidget {
         ? ref.watch(toolbarButtonGestureBindingsProvider)
         : const <String, Map<String, ToolbarButtonGestureAction>>{};
 
+    final isVertical = position.isVertical;
+
     Widget wrapMainToolbarButton(String buttonId, Widget child) {
       final bindings =
           gestureBindings[toolbarButtonGestureTargetId(buttonId)] ?? const {};
@@ -636,7 +638,6 @@ class BrowserTabBar extends HookConsumerWidget {
       );
     }
 
-    final isVertical = position.isVertical;
     // Only a vertical rail has a width to be wide; the horizontal bars leave
     // railWidth at its compact default and never take these branches.
     final wideRail = isVertical && isWideRail;
