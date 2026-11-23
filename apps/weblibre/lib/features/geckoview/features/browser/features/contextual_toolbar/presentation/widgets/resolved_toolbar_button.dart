@@ -23,6 +23,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/services/toolbar_button_resolution.dart';
@@ -30,6 +31,7 @@ import 'package:weblibre/features/geckoview/features/browser/features/contextual
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_gesture_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_surface.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
@@ -69,6 +71,15 @@ Widget buildResolvedToolbarButton(
         );
 
   if (scope.isPreview) return withLongPress;
+
+  final advancedShown = ref.watch(
+    generalSettingsWithDefaultsProvider.select(
+      (settings) => settings.isFeatureShown(
+        FeatureId.layoutContextualToolbarAdvanced,
+      ),
+    ),
+  );
+  if (!advancedShown) return withLongPress;
 
   final bindings = ref.watch(toolbarButtonGestureBindingsProvider);
   final buttonBindings =
