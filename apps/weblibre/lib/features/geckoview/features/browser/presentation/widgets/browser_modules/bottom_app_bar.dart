@@ -27,7 +27,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/window_size_class.dart';
-import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/core/providers/navigation_bar.dart';
 import 'package:weblibre/features/addons/domain/providers.dart'
     show pinnedAddonIdsProvider;
@@ -605,16 +604,7 @@ class BrowserTabBar extends HookConsumerWidget {
     final hasPinnedAddons = ref.watch(
       pinnedAddonIdsProvider.select((ids) => ids.isNotEmpty),
     );
-    final advancedGesturesShown = ref.watch(
-      generalSettingsWithDefaultsProvider.select(
-        (settings) => settings.isFeatureShown(
-          FeatureId.layoutContextualToolbarAdvanced,
-        ),
-      ),
-    );
-    final gestureBindings = advancedGesturesShown
-        ? ref.watch(toolbarButtonGestureBindingsProvider)
-        : const <String, Map<String, ToolbarButtonGestureAction>>{};
+    final gestureBindings = ref.watch(toolbarButtonGestureBindingsProvider);
 
     final isVertical = position.isVertical;
 
