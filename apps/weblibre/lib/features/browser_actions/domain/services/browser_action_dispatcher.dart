@@ -187,6 +187,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.focusAddressBar ||
     BrowserAction.scanQrCode ||
     BrowserAction.voiceSearch ||
+    BrowserAction.newTab ||
     BrowserAction.newPrivateTab ||
     BrowserAction.reopenClosedTab ||
     BrowserAction.selectTab1 ||
@@ -209,6 +210,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     BrowserAction.clearBrowsingData ||
     BrowserAction.nextContainer ||
     BrowserAction.previousContainer ||
+    BrowserAction.showHome ||
     BrowserAction.showHistory ||
     BrowserAction.showBookmarks ||
     BrowserAction.showContainers ||
