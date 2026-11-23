@@ -46,8 +46,9 @@ Widget buildResolvedToolbarButton(
   BuildContext context,
   WidgetRef ref,
   ContextualToolbarButtonResolution button,
-  Map<String, ToolbarButtonConfig> configById,
-) {
+  Map<String, ToolbarButtonConfig> configById, {
+  bool enableSwipe = true,
+}) {
   final def = toolbarButtonRegistryById[button.buttonId];
   if (def == null) return const SizedBox.shrink();
 
@@ -90,6 +91,7 @@ Widget buildResolvedToolbarButton(
       buttonBindings[ToolbarButtonGestureDirection.swipeDown.name];
 
   return ToolbarButtonGestureSurface(
+    enabled: enableSwipe,
     onSwipeUp: swipeUp == null
         ? null
         : () => runToolbarButtonGestureAction(ref, swipeUp),
