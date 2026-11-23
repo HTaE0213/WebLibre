@@ -73,6 +73,69 @@ void main() {
     expect(downCount, 1);
   });
 
+
+  testWidgets('a long press still reaches the child', (tester) async {
+    var longPressCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ToolbarButtonGestureSurface(
+              onSwipeUp: () async {},
+              onSwipeDown: () async {},
+              child: GestureDetector(
+                key: const ValueKey('gesture-target'),
+                onLongPress: () => longPressCount++,
+                child: const SizedBox(width: 80, height: 80),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.longPress(find.byKey(const ValueKey('gesture-target')));
+    await tester.pump();
+
+    expect(longPressCount, 1);
+  });
+
+  testWidgets('vertical swipe detection can stand down for scrollable rails', (
+    tester,
+  ) async {
+    var upCount = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: SizedBox(
+              width: 100,
+              height: 100,
+              child: ToolbarButtonGestureSurface(
+                enabled: false,
+                onSwipeUp: () async {
+                  upCount++;
+                },
+                child: const SingleChildScrollView(
+                  child: SizedBox(height: 300, width: 80),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final gesture = await tester.startGesture(const Offset(50, 80));
+    await gesture.moveBy(const Offset(0, -60));
+    await gesture.up();
+    await tester.pump();
+
+    expect(upCount, 0);
+  });
+
   testWidgets('a short tap still reaches the child', (tester) async {
     var tapCount = 0;
 
