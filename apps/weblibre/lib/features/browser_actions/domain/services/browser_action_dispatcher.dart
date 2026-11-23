@@ -1137,6 +1137,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
             tabMode: TabMode.fromTabType(targetTabType),
             selectTab: true,
             parentId: tabId,
+            afterTabId: tabId,
             containerSelection: tabId == null
                 ? const TabContainerSelection.useSelected()
                 : TabContainerSelection.openedFrom(tabId),
