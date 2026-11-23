@@ -138,6 +138,7 @@ class ContextualToolbar extends HookConsumerWidget {
               ref,
               button,
               configById,
+              enableSwipe: axis != Axis.vertical,
             );
             return wrapButton?.call(button.buttonId, built) ?? built;
           }).toList()
