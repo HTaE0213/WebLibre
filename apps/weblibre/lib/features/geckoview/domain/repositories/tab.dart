@@ -638,6 +638,7 @@ class TabRepository extends _$TabRepository {
     required bool selectTab,
     bool startLoading = true,
     String? parentId,
+    String? afterTabId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Source source = Internal.newTab,
     HistoryMetadataKey? historyMetadata,
@@ -709,6 +710,7 @@ class TabRepository extends _$TabRepository {
         return tabId;
       },
       parentId: Value(validatedParentId),
+      afterTabId: Value(afterTabId),
       containerId: Value(assignedContainer?.id),
       url: Value(url),
       tabMode: Value(tabMode),
