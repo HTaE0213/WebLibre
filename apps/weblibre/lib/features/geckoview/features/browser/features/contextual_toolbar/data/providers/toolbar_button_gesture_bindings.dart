@@ -149,29 +149,33 @@ class ToolbarButtonGestureBindingsNotifier
           },
       }),
       decode: (encoded) {
-        final decoded = jsonDecode(encoded);
-        if (decoded is! Map) {
-          return <String, Map<String, ToolbarButtonGestureAction>>{};
-        }
+        try {
+          final decoded = jsonDecode(encoded);
+          if (decoded is! Map) {
+            return <String, Map<String, ToolbarButtonGestureAction>>{};
+          }
 
-        final result = <String, Map<String, ToolbarButtonGestureAction>>{};
-        for (final entry in decoded.entries) {
-          if (entry.value is! Map) continue;
+          final result = <String, Map<String, ToolbarButtonGestureAction>>{};
+          for (final entry in decoded.entries) {
+            if (entry.value is! Map) continue;
 
-          final bindings = <String, ToolbarButtonGestureAction>{};
-          for (final binding in (entry.value as Map).entries) {
-            final action = ToolbarButtonGestureAction.fromJson(binding.value);
-            if (action != null) {
-              bindings[binding.key.toString()] = action;
+            final bindings = <String, ToolbarButtonGestureAction>{};
+            for (final binding in (entry.value as Map).entries) {
+              final action = ToolbarButtonGestureAction.fromJson(binding.value);
+              if (action != null) {
+                bindings[binding.key.toString()] = action;
+              }
+            }
+
+            if (bindings.isNotEmpty) {
+              result[entry.key.toString()] = bindings;
             }
           }
 
-          if (bindings.isNotEmpty) {
-            result[entry.key.toString()] = bindings;
-          }
+          return result;
+        } catch (_) {
+          return <String, Map<String, ToolbarButtonGestureAction>>{};
         }
-
-        return result;
       },
     );
 
