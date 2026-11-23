@@ -625,6 +625,7 @@ class BrowserTabBar extends HookConsumerWidget {
           bindings[ToolbarButtonGestureDirection.swipeDown.name];
 
       return ToolbarButtonGestureSurface(
+        enabled: !isVertical,
         onSwipeUp: swipeUp == null
             ? null
             : () => runToolbarButtonGestureAction(ref, swipeUp),
