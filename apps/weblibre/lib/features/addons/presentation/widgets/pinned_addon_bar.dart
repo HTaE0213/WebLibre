@@ -108,7 +108,10 @@ class PinnedAddonBar extends ConsumerWidget {
                   onSwipeDown: swipeDown == null
                       ? null
                       : () => runToolbarButtonGestureAction(ref, swipeDown),
-                  child: ExtensionBadgeIcon(extension),
+                  child: SizedBox.square(
+                    dimension: 36,
+                    child: Center(child: ExtensionBadgeIcon(extension)),
+                  ),
                 ),
               ),
             );
