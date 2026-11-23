@@ -88,12 +88,15 @@ class ToolbarButtonGestureAction {
         final actionTypeName = value['actionType'];
         var actionType = WebExtensionActionType.browser;
         if (actionTypeName is String) {
+          var found = false;
           for (final candidate in WebExtensionActionType.values) {
             if (candidate.name == actionTypeName) {
               actionType = candidate;
+              found = true;
               break;
             }
           }
+          if (!found) return null;
         }
 
         return ToolbarButtonGestureAction.extension(
