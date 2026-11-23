@@ -53,7 +53,6 @@ class ToolbarButtonGestureSettingsEditor extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final bindings = ref.watch(toolbarButtonGestureBindingsProvider);
     final targetBindings = bindings[targetId] ?? const {};
     final swipeUp = targetBindings[ToolbarButtonGestureDirection.swipeUp.name];
@@ -121,8 +120,6 @@ class _SwipeActionTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isUp = direction == ToolbarButtonGestureDirection.swipeUp;
-    final l10n = AppLocalizations.of(context);
-
     return ListTile(
       dense: dense,
       contentPadding: EdgeInsets.zero,
@@ -351,7 +348,7 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                       if (showStaleExtension)
                         ListTile(
                           leading: const Icon(Icons.extension_outlined),
-                          title: Text(selectedExtensionId),
+                          title: Text(selectedExtensionId!),
                           subtitle: const Text('Extension is not installed'),
                           selected: true,
                           enabled: false,
