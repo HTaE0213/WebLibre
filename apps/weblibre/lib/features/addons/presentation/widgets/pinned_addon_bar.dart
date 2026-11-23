@@ -22,10 +22,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_gesture_actions.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_surface.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
+import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 
 class PinnedAddonBar extends ConsumerWidget {
   const PinnedAddonBar({super.key, this.axis = Axis.horizontal});
@@ -37,6 +42,16 @@ class PinnedAddonBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pinnedIds = ref.watch(pinnedAddonIdsProvider);
+    final advancedShown = ref.watch(
+      generalSettingsWithDefaultsProvider.select(
+        (settings) => settings.isFeatureShown(
+          FeatureId.layoutContextualToolbarAdvanced,
+        ),
+      ),
+    );
+    final gestureBindings = advancedShown
+        ? ref.watch(toolbarButtonGestureBindingsProvider)
+        : const <String, Map<String, ToolbarButtonGestureAction>>{};
     final extensions = ref
         .watch(
           webExtensionsStateProvider(
@@ -55,25 +70,49 @@ class PinnedAddonBar extends ConsumerWidget {
 
     final items = [
       for (final extension in pinned)
-        InkResponse(
-          radius: 22,
-          onTap: () async {
-            await ref
-                .read(addonServiceProvider)
-                .invokeAddonAction(
-                  extension.extensionId,
-                  WebExtensionActionType.browser,
-                );
+        Builder(
+          builder: (context) {
+            final bindings =
+                gestureBindings[addonGestureTargetId(extension.extensionId)] ??
+                const <String, ToolbarButtonGestureAction>{};
+            final swipeUp =
+                bindings[ToolbarButtonGestureDirection.swipeUp.name];
+            final swipeDown =
+                bindings[ToolbarButtonGestureDirection.swipeDown.name];
+
+            return InkResponse(
+              radius: 22,
+              onTap: () async {
+                await ref
+                    .read(addonServiceProvider)
+                    .invokeAddonAction(
+                      extension.extensionId,
+                      WebExtensionActionType.browser,
+                    );
+              },
+              onLongPress: () async {
+                await AddonDetailsRoute(
+                  addonId: extension.extensionId,
+                ).push<void>(context);
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 6.0,
+                  vertical: 8.0,
+                ),
+                child: ToolbarButtonGestureSurface(
+                  enabled: !isVertical,
+                  onSwipeUp: swipeUp == null
+                      ? null
+                      : () => runToolbarButtonGestureAction(ref, swipeUp),
+                  onSwipeDown: swipeDown == null
+                      ? null
+                      : () => runToolbarButtonGestureAction(ref, swipeDown),
+                  child: ExtensionBadgeIcon(extension),
+                ),
+              ),
+            );
           },
-          onLongPress: () async {
-            await AddonDetailsRoute(
-              addonId: extension.extensionId,
-            ).push<void>(context);
-          },
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 8.0),
-            child: ExtensionBadgeIcon(extension),
-          ),
         ),
     ];
 
