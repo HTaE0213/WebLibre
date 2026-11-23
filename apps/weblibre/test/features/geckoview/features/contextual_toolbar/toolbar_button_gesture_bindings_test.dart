@@ -44,5 +44,16 @@ void main() {
         isNull,
       );
     });
+
+    test('drops unknown extension action types', () {
+      expect(
+        ToolbarButtonGestureAction.fromJson({
+          'type': 'extension',
+          'extensionId': 'test-extension@example.com',
+          'actionType': 'futureAction',
+        }),
+        isNull,
+      );
+    });
   });
 }
