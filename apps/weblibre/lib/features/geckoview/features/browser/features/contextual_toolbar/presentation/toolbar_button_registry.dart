@@ -184,9 +184,11 @@ final List<ToolbarButtonDefinition> toolbarButtonRegistry = [
         tooltip: l10n.contextualToolbar_tooltipHome,
         onPressed: scope.isPreview
             ? () {}
-            : () {
-                ref.read(forceBrowserHomeProvider.notifier).request();
-              },
+            : () => unawaited(
+                ref
+                    .read(browserActionDispatcherProvider.notifier)
+                    .run(BrowserAction.showHome),
+              ),
         icon: const Icon(Icons.home_outlined),
       );
     },
