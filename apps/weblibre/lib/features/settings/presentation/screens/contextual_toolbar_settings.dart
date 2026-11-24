@@ -467,7 +467,7 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                               (ref.watch(toolbarButtonGestureBindingsProvider)[
                                             toolbarButtonGestureTargetId(
                                               config.buttonId,
-                                            ),
+                                            )
                                           ]?.isNotEmpty ??
                                           false)
                               ? const [HiddenSetting.toolbarButtons]
