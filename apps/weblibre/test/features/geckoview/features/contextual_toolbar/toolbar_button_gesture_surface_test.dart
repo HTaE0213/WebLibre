@@ -89,6 +89,7 @@ void main() {
               onSwipeDown: () async {},
               child: GestureDetector(
                 key: const ValueKey('gesture-target'),
+                behavior: HitTestBehavior.opaque,
                 onLongPress: () => longPressCount++,
                 child: const SizedBox(width: 80, height: 80),
               ),
@@ -151,6 +152,7 @@ void main() {
               onSwipeDown: () async {},
               child: GestureDetector(
                 key: const ValueKey('gesture-target'),
+                behavior: HitTestBehavior.opaque,
                 onTap: () => tapCount++,
                 child: const SizedBox(width: 80, height: 80),
               ),
