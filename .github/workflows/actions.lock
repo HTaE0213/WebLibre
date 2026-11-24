@@ -15,6 +15,13 @@ workflows:
     '.github/workflows/feature-validation.yml':
         - 'actions/checkout@v7.0.1'
         - 'subosito/flutter-action@v2.23.0'
+    '.github/workflows/pr-alpha-apk.yml':
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-go@v7.0.0'
+        - 'actions/setup-java@v6.2.0'
+        - 'actions/setup-node@v7.1.0'
+        - 'actions/upload-artifact@v7.0.2'
+        - 'subosito/flutter-action@v2.23.0'
     '.github/workflows/workflow-security.yml':
         - 'actions/checkout@v7.0.1'
         - 'zizmorcore/zizmor-action@v0.8.1'
