@@ -9,6 +9,9 @@ package eu.weblibre.flutter_mozilla_components
 import eu.weblibre.flutter_mozilla_components.api.GeckoBrowserApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoEngineSettingsApiImpl
 import eu.weblibre.flutter_mozilla_components.api.GeckoProfileApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoTabLifecycleApiImpl
+import eu.weblibre.flutter_mozilla_components.api.GeckoTabLockApiImpl
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoBrowserApi
@@ -16,10 +19,13 @@ import eu.weblibre.flutter_mozilla_components.pigeons.GeckoEngineSettingsApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoProfileApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoPushApi
 import eu.weblibre.flutter_mozilla_components.pigeons.GeckoSplitViewApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabLifecycleApi
+import eu.weblibre.flutter_mozilla_components.pigeons.GeckoTabLockApi
 import eu.weblibre.flutter_mozilla_components.pigeons.PointerInputHostApi
 import eu.weblibre.flutter_mozilla_components.pointer.PointerInputRouter
 import eu.weblibre.flutter_mozilla_components.split.SplitStateMirror
 import eu.weblibre.flutter_mozilla_components.startup.DartStartupProgress
+import eu.weblibre.flutter_mozilla_components.tabs.TabCloseProtection
 
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -119,10 +125,22 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     )
     GeckoEngineSettingsApi.setUp(flutterPluginBinding.binaryMessenger, engineSettingsApiImpl)
     GlobalComponents.engineSettingsApi = engineSettingsApiImpl
+
+    // At attach time for the same reason: Dart bootstraps the tab locks before
+    // the engine restores the session.
+    TabCloseProtection.attach(flutterPluginBinding.applicationContext)
+    TabLifecycleRegistry.attach(flutterPluginBinding.applicationContext)
+    GeckoTabLockApi.setUp(flutterPluginBinding.binaryMessenger, GeckoTabLockApiImpl())
+    // And for the sleep policy and the freeze registry, which Dart sends and
+    // reads before the engine starts: both are process-wide, and every call
+    // that needs the components resolves them when it runs.
+    GeckoTabLifecycleApi.setUp(flutterPluginBinding.binaryMessenger, GeckoTabLifecycleApiImpl())
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     PointerInputHostApi.setUp(binding.binaryMessenger, null)
+    GeckoTabLockApi.setUp(binding.binaryMessenger, null)
+    GeckoTabLifecycleApi.setUp(binding.binaryMessenger, null)
     pointerRouter?.dispose()
     pointerRouter = null
     GeckoProfileApi.setUp(binding.binaryMessenger, null)
@@ -152,6 +170,8 @@ class FlutterMozillaComponentsPlugin: FlutterPlugin, ActivityAware {
     // the old messenger across an engine restart. Progress is advisory, so
     // dropping the sink only costs the percentage, never the import itself.
     GlobalComponents.bookmarksEvents = null
+    // Native log lines go back to logcat rather than to this engine's messenger.
+    ProcessLogSink.detach(browserApi)
     // The split pair lives in the detaching engine's memory. Kept here it
     // would be a pair nobody controls, so native drops to single presentation
     // until the next engine pushes its own state.

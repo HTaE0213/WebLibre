@@ -1677,11 +1677,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después.';
+      'Android te pedirá que confirmes la actualización. Luego WebLibre se cerrará para instalarla. Vuelve a abrirlo después.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre se cerrará para instalar la actualización. Vuelve a abrirlo después. Las pestañas privadas se cerrarán.';
+      'Android te pedirá que confirmes la actualización. Luego WebLibre se cerrará para instalarla. Vuelve a abrirlo después. Las pestañas privadas se cerrarán.';
 
   @override
   String get bangs_menuTitle => 'Bangs';
@@ -2089,6 +2089,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Fijar o desfijar la pestaña actual';
 
   @override
+  String get browserActions_toggleLockTabTitle =>
+      'Bloquear / desbloquear pestaña';
+
+  @override
+  String get browserActions_toggleLockTabDescription =>
+      'Impedir que se cierre la pestaña actual, o permitirlo de nuevo';
+
+  @override
   String get browserActions_moveTabBackwardTitle => 'Mover pestaña atrás';
 
   @override
@@ -2230,12 +2238,22 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browserActions_tabUnpinnedMessage => 'Pestaña desfijada';
 
   @override
+  String get browserActions_tabLockedMessage => 'Pestaña bloqueada';
+
+  @override
+  String get browserActions_tabUnlockedMessage => 'Pestaña desbloqueada';
+
+  @override
   String get browserActions_homeScreenUnavailableMessage =>
       'Esta página no se puede añadir a la pantalla de inicio';
 
   @override
   String get browserActions_readerViewUnavailableMessage =>
       'La vista de lectura no está disponible para esta página';
+
+  @override
+  String get browserActions_pageAsleepMessage =>
+      'Esta pestaña está en suspensión. Reactívala primero.';
 
   @override
   String get browserActions_noClosedTabsMessage =>
@@ -2616,6 +2634,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get browserActions_togglePinTabKeywords =>
       'fijar pestaña, desfijar, anclar, pin';
+
+  @override
+  String get browserActions_toggleLockTabKeywords =>
+      'bloquear pestaña, desbloquear, mantener abierta, proteger, impedir cierre, lock';
 
   @override
   String get browserActions_closeTabKeywords => 'cerrar, quitar pestaña';
@@ -3453,6 +3475,10 @@ class AppLocalizationsEs extends AppLocalizations {
       'Cerrar esta pestaña cuando se hayan borrado los datos';
 
   @override
+  String get browser_closeTabAfterClearingLocked =>
+      'Desbloquea la pestaña para cerrarla después de borrar';
+
+  @override
   String get browser_clearingEllipsis => 'Borrando...';
 
   @override
@@ -3706,6 +3732,474 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get browser_unpinTab => 'Desfijar pestaña';
+
+  @override
+  String get browser_lockTab => 'Bloquear pestaña';
+
+  @override
+  String get browser_unlockTab => 'Desbloquear pestaña';
+
+  @override
+  String get browser_tabLockedLabel => 'Bloqueada';
+
+  @override
+  String get browser_tabUnlockIncompleteLabel =>
+      'Bloqueada; el desbloqueo no terminó';
+
+  @override
+  String get browser_retryUnlockTab => 'Reintentar desbloquear pestaña';
+
+  @override
+  String get browser_tabUnlockIncompleteMessage =>
+      'El desbloqueo no terminó. La pestaña sigue bloqueada hasta que termine.';
+
+  @override
+  String get browser_tabLockFailed => 'No se pudo bloquear esta pestaña';
+
+  @override
+  String get browser_tabUnlockFailed => 'No se pudo desbloquear esta pestaña';
+
+  @override
+  String get browser_tabLockPrivate =>
+      'Las pestañas privadas no se pueden bloquear';
+
+  @override
+  String get browser_lockedTabCannotMove =>
+      'Desbloquea esta pestaña para moverla a un contenedor con almacenamiento propio';
+
+  @override
+  String get browser_tabMoveFailed =>
+      'La pestaña no se movió. Inténtalo de nuevo.';
+
+  @override
+  String get browser_containerBeingDeleted =>
+      'Este contenedor se está eliminando';
+
+  @override
+  String get browser_containerFrozen => 'Reanuda primero el contenedor';
+
+  @override
+  String get browser_tabIsLocked => 'Esta pestaña está bloqueada';
+
+  @override
+  String get browser_closeFailed => 'No se cerró nada. Inténtalo de nuevo.';
+
+  @override
+  String browser_lockedTabsKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Se conservaron $count pestañas bloqueadas',
+      one: 'Esta pestaña está bloqueada',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_tabsClosedKeptLocked(int closed, int locked) {
+    String _temp0 = intl.Intl.pluralLogic(
+      closed,
+      locale: localeName,
+      other: 'Se cerraron $closed pestañas.',
+      one: 'Se cerró 1 pestaña.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      locked,
+      locale: localeName,
+      other: 'Se conservaron $locked pestañas bloqueadas.',
+      one: 'Se conservó 1 pestaña bloqueada.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_menuSleepAllTabs =>
+      'Poner en suspensión todas las pestañas';
+
+  @override
+  String get browser_sleepTab => 'Poner en suspensión';
+
+  @override
+  String get browser_sleepTabDescription =>
+      'Libera memoria descargando la página. Se vuelve a cargar cuando reactivas la pestaña. Parte del estado de la página sin guardar puede perderse.';
+
+  @override
+  String browser_sleepTabsConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '¿Poner $count pestañas en suspensión?',
+      one: '¿Poner esta pestaña en suspensión?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_wakeTab => 'Reactivar pestaña';
+
+  @override
+  String get browser_wakeTabRoutingNotReady =>
+      'La conexión de esta pestaña aún no está lista, así que sigue en suspensión';
+
+  @override
+  String get browser_tabAsleepLabel => 'En suspensión';
+
+  @override
+  String get browser_sleepAskTitle => '¿Poner en suspensión de todos modos?';
+
+  @override
+  String browser_sleepAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pestañas están reproduciendo contenido multimedia. Al ponerlas en suspensión se detiene la reproducción.',
+      one:
+          'Esta pestaña está reproduciendo contenido multimedia. Al ponerla en suspensión se detiene la reproducción.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count páginas son el resultado del envío de un formulario. Al recargarse, los formularios no se vuelven a enviar, por lo que las páginas pueden no volver como estaban.',
+      one:
+          'Esta página es el resultado del envío de un formulario. Al recargarse, el formulario no se vuelve a enviar, por lo que la página puede no volver como estaba.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pestañas tienen texto escrito en un formulario. Al ponerlas en suspensión puede perderse.',
+      one:
+          'Esta pestaña tiene texto escrito en un formulario. Al ponerla en suspensión puede perderse.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepTabsPartial(int slept, int kept) {
+    String _temp0 = intl.Intl.pluralLogic(
+      slept,
+      locale: localeName,
+      other: 'Se pusieron $slept pestañas en suspensión.',
+      one: 'Se puso 1 pestaña en suspensión.',
+      zero: 'No se puso ninguna pestaña en suspensión.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      kept,
+      locale: localeName,
+      other: '$kept pestañas se mantuvieron activas por lo que están haciendo.',
+      one: '1 pestaña se mantuvo activa por lo que está haciendo.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_sleepTabFailed =>
+      'No se pudo poner esta pestaña en suspensión';
+
+  @override
+  String get browser_sleepRefusedRecording =>
+      'Esta pestaña usa la cámara, el micrófono o el uso compartido de pantalla, así que no se puso en suspensión';
+
+  @override
+  String get browser_sleepRefusedFormData =>
+      'Esta pestaña tiene datos de formulario que se perderían, así que no se puso en suspensión';
+
+  @override
+  String get browser_sleepRefusedUpload =>
+      'Se eligió un archivo para subir en esta pestaña, así que no se puso en suspensión';
+
+  @override
+  String get browser_sleepRefusedPrintOrPdf =>
+      'Esta pestaña se está imprimiendo o guardando como PDF, así que no se puso en suspensión';
+
+  @override
+  String get browser_sleepRefusedDownload =>
+      'Una descarga de esta pestaña sigue en curso, así que no se puso en suspensión';
+
+  @override
+  String get browser_freezeContainer => 'Congelar contenedor';
+
+  @override
+  String get browser_menuFreezeContainer => 'Congelar contenedor';
+
+  @override
+  String browser_freezeContainerTitle(String container) {
+    return '¿Congelar el contenedor «$container»?';
+  }
+
+  @override
+  String get browser_freezeContainerDescription =>
+      'Descarga sus pestañas de la memoria y detiene lo que sus sitios hacen en segundo plano, como los mensajes push y los service workers, hasta que lo reanudes. Se conservan las cookies, los inicios de sesión y los datos de sitios. Las pestañas nuevas que se abran en él esperan hasta entonces. Los mensajes push enviados mientras tanto se omiten.';
+
+  @override
+  String get browser_resumeContainer => 'Reanudar contenedor';
+
+  @override
+  String get browser_stopFreezing => 'Detener la congelación y reanudar';
+
+  @override
+  String get browser_retryFreeze => 'Volver a intentar congelar';
+
+  @override
+  String get browser_containerFrozenLabel => 'Congelado';
+
+  @override
+  String get browser_containerFreezing => 'Congelando…';
+
+  @override
+  String browser_containerFreezingProgress(int done, int total) {
+    return 'Congelando… $done de $total';
+  }
+
+  @override
+  String get browser_containerResuming => 'Reanudando…';
+
+  @override
+  String get browser_freezeIncompleteLabel => 'Congelación incompleta';
+
+  @override
+  String get browser_resumeIncompleteLabel => 'Reanudación incompleta';
+
+  @override
+  String get browser_freezeIncompleteBlocked =>
+      'Congelación incompleta: la actividad nueva está bloqueada, pero parte de la que ya estaba en marcha puede no haberse detenido';
+
+  @override
+  String get browser_freezeIncompleteUncertain =>
+      'Congelación incompleta: puede que la actividad en segundo plano no esté bloqueada';
+
+  @override
+  String get browser_resumeIncompleteBlocked =>
+      'Reanudación incompleta: sigue bloqueado, vuelve a reanudar';
+
+  @override
+  String get browser_resumeIncompleteLifted =>
+      'Reanudación incompleta: puede que la actividad en segundo plano ya esté en marcha';
+
+  @override
+  String get browser_freezeNeedsOwnStorage =>
+      'Necesita su propio almacenamiento de cookies';
+
+  @override
+  String get browser_freezeSharedStorage =>
+      'Una pestaña aislada de este contenedor comparte su almacenamiento con una pestaña de fuera, así que no se puede congelar';
+
+  @override
+  String get browser_resumeSharedWithFrozen =>
+      'Una pestaña aislada de otro contenedor congelado comparte el almacenamiento de este contenedor. Reanuda primero ese contenedor.';
+
+  @override
+  String get browser_freezeRecoveryPending =>
+      'Se están restableciendo los contenedores congelados. Inténtalo de nuevo en un momento.';
+
+  @override
+  String get browser_undoWaitsForSiteData =>
+      'Esta pestaña no puede volver hasta que se eliminen sus datos de sitios';
+
+  @override
+  String get browser_resumeFreezeStateUnknown =>
+      'El contenedor no se reanudó porque WebLibre no pudo comprobar qué está congelado. Inténtalo de nuevo.';
+
+  @override
+  String get browser_freezeBusy =>
+      'Este contenedor está ocupado. Inténtalo de nuevo en un momento.';
+
+  @override
+  String browser_containerFrozenDone(String container) {
+    return 'El contenedor «$container» está congelado';
+  }
+
+  @override
+  String browser_containerResumedDone(String container) {
+    return 'Contenedor «$container» reanudado';
+  }
+
+  @override
+  String get browser_freezeFailedShared =>
+      'Una pestaña de fuera de este contenedor usa su almacenamiento, así que no se congeló';
+
+  @override
+  String get browser_freezeFailedMembershipChanged =>
+      'Mientras tanto se unió una pestaña a este contenedor, así que no se congeló. Inténtalo de nuevo.';
+
+  @override
+  String get browser_freezeFailedMemberOutside =>
+      'Una pestaña de este contenedor no usa su almacenamiento, así que no se congeló. Cierra esa pestaña o muévela a otro contenedor y vuelve a intentarlo.';
+
+  @override
+  String get browser_freezeFailedExternalWindow =>
+      'Hay abierta una aplicación web o una pestaña personalizada de este contenedor. Ciérrala y vuelve a intentarlo.';
+
+  @override
+  String get browser_freezeFailedEngineRefused =>
+      'El motor del navegador rechazó congelar este contenedor. No se cambió nada.';
+
+  @override
+  String get browser_freezeFailedNotPersisted =>
+      'No se pudo guardar el estado de congelado, así que el contenedor no se congeló';
+
+  @override
+  String get browser_freezeFailedQuiescence =>
+      'Congelación incompleta: parte de la actividad no se detuvo a tiempo. La actividad nueva está bloqueada; reanuda o vuelve a intentarlo.';
+
+  @override
+  String get browser_freezeFailedGeneric =>
+      'La congelación de este contenedor no terminó. Reanúdalo o vuelve a intentarlo.';
+
+  @override
+  String get browser_resumeRoutingNotReady =>
+      'La conexión de este contenedor aún no está lista, así que sigue congelado';
+
+  @override
+  String get browser_resumeIsolationCleanupFailed =>
+      'No se pudieron eliminar antes los datos de una pestaña aislada cerrada, así que el contenedor sigue congelado. Inténtalo de nuevo.';
+
+  @override
+  String get browser_resumeFailedBlocked =>
+      'La reanudación no terminó. El contenedor sigue congelado; vuelve a intentarlo.';
+
+  @override
+  String get browser_resumeFailedLifted =>
+      'La reanudación no terminó. Puede que sus sitios ya se ejecuten en segundo plano; vuelve a intentarlo.';
+
+  @override
+  String get browser_freezeBlockedTitle =>
+      'Aún no se puede congelar este contenedor';
+
+  @override
+  String get browser_freezeBlockedRecording =>
+      'Usa la cámara, el micrófono o el uso compartido de pantalla';
+
+  @override
+  String get browser_freezeBlockedFormData =>
+      'Tiene datos de formulario que se perderían';
+
+  @override
+  String get browser_freezeBlockedUpload => 'Se eligió un archivo para subir';
+
+  @override
+  String get browser_freezeBlockedPrintOrPdf =>
+      'Se está imprimiendo o guardando como PDF';
+
+  @override
+  String get browser_freezeBlockedDownload =>
+      'Sigue en curso una descarga de este contenedor';
+
+  @override
+  String get browser_freezeBlockedUnattributedDownload =>
+      'Hay una descarga en curso cuyo contenedor se desconoce';
+
+  @override
+  String get browser_freezeBlockedTabGone => 'Pestaña cerrada';
+
+  @override
+  String get browser_freezeBlockedShowTab => 'Mostrar pestaña';
+
+  @override
+  String get browser_freezeBlockedViewDownloads => 'Ver descargas';
+
+  @override
+  String get browser_freezeAskTitle => '¿Congelar de todos modos?';
+
+  @override
+  String browser_freezeAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pestañas de este contenedor están reproduciendo contenido multimedia. Al congelar se detiene la reproducción.',
+      one:
+          'Una pestaña de este contenedor está reproduciendo contenido multimedia. Al congelar se detiene la reproducción.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count páginas de este contenedor son el resultado del envío de un formulario. Al recargarse tras reanudar, los formularios no se vuelven a enviar, por lo que las páginas pueden no volver como estaban.',
+      one:
+          'Una página de este contenedor es el resultado del envío de un formulario. Al recargarse tras reanudar, el formulario no se vuelve a enviar, por lo que la página puede no volver como estaba.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pestañas de este contenedor tienen texto escrito en un formulario. Al congelar puede perderse.',
+      one:
+          'Una pestaña de este contenedor tiene texto escrito en un formulario. Al congelar puede perderse.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_resumeAndOpenTitle(String container) {
+    return '¿Reanudar el contenedor «$container» y abrir?';
+  }
+
+  @override
+  String get browser_resumeAndOpenContent =>
+      'Este contenedor está congelado, así que nada se carga en él hasta que se reanude.';
+
+  @override
+  String get browser_resumeAndOpen => 'Reanudar y abrir';
+
+  @override
+  String get browser_resumeAndOpenCancelled =>
+      'No se abrió nada. El contenedor sigue congelado.';
+
+  @override
+  String get browser_containerFrozenToBeSafeLabel =>
+      'Congelado por seguridad tras un registro dañado';
+
+  @override
+  String get browser_frozenToBeSafeTitle =>
+      'Contenedores congelados por seguridad';
+
+  @override
+  String browser_frozenToBeSafeContent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'El registro de WebLibre de qué contenedores están congelados estaba dañado, así que, por seguridad, congeló los $count contenedores que tienen almacenamiento de cookies propio. Reanuda cada uno cuando quieras que sus sitios vuelvan a ejecutarse.',
+      one:
+          'El registro de WebLibre de qué contenedores están congelados estaba dañado, así que, por seguridad, congeló el contenedor que tiene almacenamiento de cookies propio. Reanúdalo cuando quieras que sus sitios vuelvan a ejecutarse.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_frozenToBeSafeShowContainers => 'Mostrar contenedores';
+
+  @override
+  String get browser_freezeRecoveryFailed =>
+      'WebLibre no pudo restablecer qué contenedores están congelados, así que por ahora todos los contenedores siguen congelados';
+
+  @override
+  String browser_containerDeletionNotFinished(String container) {
+    return 'No terminó la eliminación del contenedor «$container», así que sigue ahí';
+  }
 
   @override
   String get browser_pinTab => 'Fijar pestaña';
@@ -4084,6 +4578,37 @@ class AppLocalizationsEs extends AppLocalizations {
   String get browser_tabPickerNothingHere => 'No hay pestañas para elegir aquí';
 
   @override
+  String get browser_keepTabAwake => 'Mantener activa';
+
+  @override
+  String get browser_allowTabSleeping => 'Permitir suspensión';
+
+  @override
+  String get browser_keepTabAwakeDescription =>
+      'La suspensión automática y la congelación automática omiten una pestaña mantenida activa. Aun así, puedes ponerla en suspensión o congelar su contenedor manualmente.';
+
+  @override
+  String get browser_pinTabShort => 'Fijar';
+
+  @override
+  String get browser_unpinTabShort => 'Desfijar';
+
+  @override
+  String get browser_lockTabShort => 'Bloquear';
+
+  @override
+  String get browser_unlockTabShort => 'Desbloquear';
+
+  @override
+  String get browser_sleepTabShort => 'Suspender';
+
+  @override
+  String get browser_wakeTabShort => 'Reactivar';
+
+  @override
+  String get browser_tabKeptAwakeLabel => 'Mantenida activa';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Inicio';
 
   @override
@@ -4285,6 +4810,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get menu_itemMoreDisclosure => 'Más';
 
   @override
+  String menu_moreDisclosureSummary(String items, int count) {
+    return '$items y $count más';
+  }
+
+  @override
   String get menu_itemCloneTab => 'Clonar pestaña';
 
   @override
@@ -4316,6 +4846,12 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get menu_itemPinTopSite => 'Fijar en accesos directos';
+
+  @override
+  String get menu_itemLockTab => 'Bloquear pestaña';
+
+  @override
+  String get menu_itemSleepTab => 'Poner pestaña en suspensión';
 
   @override
   String get menu_itemFetchFeeds => 'Obtener fuentes';
@@ -4568,6 +5104,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get menu_pinUpdateFailed =>
       'No se pudieron actualizar los accesos directos';
+
+  @override
+  String get menu_lockTab => 'Bloquear pestaña';
+
+  @override
+  String get menu_unlockTab => 'Desbloquear pestaña';
+
+  @override
+  String get menu_retryUnlockTab => 'Reintentar desbloquear pestaña';
+
+  @override
+  String get menu_sleepTab => 'Poner pestaña en suspensión';
+
+  @override
+  String get menu_wakeTab => 'Reactivar pestaña';
 
   @override
   String get menu_fetchFeedsTitle => 'Obtener fuentes de la página';
@@ -5869,6 +6420,69 @@ class AppLocalizationsEs extends AppLocalizations {
   String get splitView_crashedReload => 'Recargar';
 
   @override
+  String get splitView_sleepingTitle => 'Esta pestaña está en suspensión';
+
+  @override
+  String get splitView_sleepingWake => 'Reactivar';
+
+  @override
+  String get splitView_frozenTitle => 'Este contenedor está congelado';
+
+  @override
+  String splitView_frozenTitleNamed(String container) {
+    return 'El contenedor «$container» está congelado';
+  }
+
+  @override
+  String splitView_freezingTitleNamed(String container) {
+    return 'Congelando el contenedor «$container»…';
+  }
+
+  @override
+  String splitView_freezeIncompleteTitleNamed(String container) {
+    return 'La congelación del contenedor «$container» no terminó';
+  }
+
+  @override
+  String splitView_resumingTitleNamed(String container) {
+    return 'Reanudando el contenedor «$container»…';
+  }
+
+  @override
+  String splitView_resumeIncompleteTitleNamed(String container) {
+    return 'La reanudación del contenedor «$container» no terminó';
+  }
+
+  @override
+  String get splitView_frozenResume => 'Reanudar';
+
+  @override
+  String splitView_frozenSkippedMessages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Se omitieron $count mensajes en segundo plano. Los mensajes omitidos no se entregan al reanudar.',
+      one:
+          'Se omitió 1 mensaje en segundo plano. Los mensajes omitidos no se entregan al reanudar.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String splitView_frozenToBeSafeTitleNamed(String container) {
+    return 'El contenedor «$container» se congeló por seguridad';
+  }
+
+  @override
+  String get splitView_frozenToBeSafeDetail =>
+      'El registro de contenedores congelados de WebLibre estaba dañado. Reanuda para cargar esta pestaña.';
+
+  @override
+  String get splitView_frozenRecoveryTitle =>
+      'Congelado hasta que WebLibre restablezca qué contenedores están congelados';
+
+  @override
   String get splitView_couldNotOpen => 'No se pudo abrir la vista dividida';
 
   @override
@@ -5918,6 +6532,125 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tabs_deleteContainerHistoryKeptNote =>
       'Si no se marca, las visitas permanecen en el historial pero ya no están asignadas a ningún contenedor.';
+
+  @override
+  String get tabs_deleteContainerAlsoDeleteSiteData =>
+      'Eliminar también los datos de sitios';
+
+  @override
+  String get tabs_deleteContainerSiteDataNote =>
+      'Cookies, inicios de sesión, datos sin conexión y suscripciones a notificaciones';
+
+  @override
+  String get tabs_deleteContainerSiteDataFrozenNote =>
+      'Los datos de un contenedor congelado se eliminan con él, para que su actividad en segundo plano no pueda reanudarse nunca.';
+
+  @override
+  String get tabs_siteDataPendingTitle =>
+      'Datos de sitios pendientes de eliminar';
+
+  @override
+  String get tabs_siteDataPendingExplanation =>
+      'Hasta que se eliminen sus datos, los sitios de estos contenedores permanecen bloqueados. La eliminación se reintenta en cada inicio.';
+
+  @override
+  String get tabs_siteDataPendingDeletedContainer => 'Contenedor eliminado';
+
+  @override
+  String tabs_siteDataPendingClosedIsolatedTabs(String container) {
+    return 'Pestañas aisladas cerradas en $container';
+  }
+
+  @override
+  String get tabs_siteDataPendingOrphaned => 'El contenedor ya no existe';
+
+  @override
+  String get tabs_siteDataPendingDelete => 'Eliminar datos';
+
+  @override
+  String get tabs_siteDataPendingDeleting => 'Eliminando…';
+
+  @override
+  String get tabs_siteDataPendingDeleted => 'Datos de sitios eliminados';
+
+  @override
+  String get tabs_siteDataPendingFailed =>
+      'Aún no se pudieron eliminar los datos de sitios. Se volverá a intentar en el próximo inicio.';
+
+  @override
+  String tabs_siteDataPendingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count áreas de almacenamiento',
+      one: '1 área de almacenamiento',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_freezeRecoveryTitle =>
+      'Restableciendo contenedores congelados';
+
+  @override
+  String get tabs_freezeRecoveryRestoring =>
+      'El registro de WebLibre de qué contenedores están congelados estaba dañado. Hasta que se restablezca, todos los contenedores con almacenamiento de cookies propio permanecen congelados.';
+
+  @override
+  String get tabs_freezeRecoveryFailed =>
+      'El registro de WebLibre de qué contenedores están congelados estaba dañado y su restablecimiento no terminó. Hasta que termine, todos los contenedores con almacenamiento de cookies propio permanecen congelados.';
+
+  @override
+  String tabs_deleteContainerLockedTabs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Hay $count pestañas bloqueadas en este contenedor. Desbloquéalas antes de eliminarlo.',
+      one:
+          'Hay 1 pestaña bloqueada en este contenedor. Desbloquéala antes de eliminarlo.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_deleteContainerShowTabs => 'Mostrar pestañas';
+
+  @override
+  String get tabs_deleteContainerIncomplete =>
+      'No se pudieron cerrar algunas pestañas de este contenedor, así que se conservó el contenedor';
+
+  @override
+  String get tabs_deleteContainerNotPersisted =>
+      'El contenedor no se eliminó porque no se pudo guardar su estado de congelado. Inténtalo de nuevo.';
+
+  @override
+  String get tabs_deleteContainerFreezeStateUnknown =>
+      'El contenedor no se eliminó porque WebLibre no pudo comprobar si está congelado. Inténtalo de nuevo.';
+
+  @override
+  String get tabs_deleteContainerSiteDataPending =>
+      'Contenedor eliminado; limpieza de datos de sitios pendiente';
+
+  @override
+  String get tabs_deleteContainerOpenInWebApp =>
+      'Cierra primero las aplicaciones web y las pestañas personalizadas de este contenedor';
+
+  @override
+  String get tabs_deleteContainerSharedStorage =>
+      'Una pestaña aislada de otro contenedor usa el almacenamiento de este contenedor congelado. Reanuda el contenedor antes de eliminarlo.';
+
+  @override
+  String get tabs_deleteContainerBusy =>
+      'Este contenedor aún se está modificando. Inténtalo de nuevo en un momento.';
+
+  @override
+  String get tabs_deleteContainerRecoveryPending =>
+      'No se puede eliminar ningún contenedor mientras se restablecen los contenedores congelados';
+
+  @override
+  String get tabs_deleteContainerHistoryFailed =>
+      'Se eliminó el contenedor, pero no se pudo eliminar su historial';
 
   @override
   String get tabs_deleteContainerButton => 'Eliminar contenedor';
@@ -6156,6 +6889,40 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Requiere activar el aislamiento de cookies';
+
+  @override
+  String get tabs_autoFreezeTitle => 'Congelar automáticamente';
+
+  @override
+  String get tabs_autoFreezeOff => 'Desactivado';
+
+  @override
+  String tabs_autoFreezeAfterMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tras $count minutos sin usar, contado mientras WebLibre está abierto',
+      one: 'Tras 1 minuto sin usar, contado mientras WebLibre está abierto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tabs_autoFreezeAfterHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Tras $count horas sin usar, contado mientras WebLibre está abierto',
+      one: 'Tras 1 hora sin usar, contado mientras WebLibre está abierto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_autoFreezeExplanation =>
+      'Congela este contenedor cuando ninguna de sus pestañas se haya usado durante el tiempo que elijas. Solo cuenta el tiempo con WebLibre abierto. Al congelar, se descargan de la memoria sus pestañas y se detiene lo que ejecuta en segundo plano, incluidas las notificaciones, hasta que lo reanudes. Espera mientras una de sus pestañas reproduce contenido multimedia, está en una llamada, tiene una descarga o está en «Mantener activa». El texto escrito lo mantiene en espera hasta que lleve una hora sin usarse; después, el texto puede perderse.';
 
   @override
   String get tabs_isolatedAppLinkSettings =>
@@ -10374,7 +11141,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get settings_autoClearUnassignedTabsSubtitle =>
-      'Cerrar automáticamente las pestañas sin asignar anteriores al periodo seleccionado';
+      'Cerrar automáticamente las pestañas sin asignar anteriores al periodo seleccionado. Las pestañas bloqueadas se conservan.';
 
   @override
   String get settings_durationNever => 'Nunca';
@@ -12617,6 +13384,61 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settings_featureControlSectionTitle => 'Funciones';
 
   @override
+  String get settings_sleepingTabsSectionTitle => 'Pestañas en suspensión';
+
+  @override
+  String get settings_autoSleepTabsTitle =>
+      'Suspender pestañas automáticamente';
+
+  @override
+  String get settings_autoSleepTabsSubtitle =>
+      'Mientras WebLibre está abierto, descarga de la memoria las pestañas que no has mirado durante un tiempo. Toca Reactivar en una pestaña en suspensión para cargarla de nuevo.';
+
+  @override
+  String get settings_autoSleepTabsKeywords =>
+      'suspender, suspensión, descargar, memoria, descartar, inactivas, pestañas inactivas, sleep';
+
+  @override
+  String get settings_autoSleepIdleTitle => 'Suspender tras';
+
+  @override
+  String get settings_autoSleepIdleSubtitle =>
+      'Cuánto tiempo está una pestaña fuera de pantalla antes de ponerla en suspensión';
+
+  @override
+  String get settings_autoSleepIdleKeywords =>
+      'suspender, tiempo de espera, inactividad, inactiva, sleep';
+
+  @override
+  String get settings_residentTabLimitTitle => 'Límite de pestañas cargadas';
+
+  @override
+  String get settings_residentTabLimitSubtitle =>
+      'Por encima de este número de pestañas cargadas, se ponen en suspensión las que miraste hace más tiempo.';
+
+  @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Las pestañas en pantalla siempre siguen cargadas. Las demás se ponen en suspensión después de salir de ellas, salvo que se mantengan activas, sigan cargando o estén en uso.';
+
+  @override
+  String get settings_residentTabLimitKeywords =>
+      'límite, memoria, pestañas cargadas, suspensión, limit';
+
+  @override
+  String get settings_residentTabLimitOff => 'Sin límite';
+
+  @override
+  String settings_residentTabLimitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pestañas',
+      one: '1 pestaña',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override
@@ -14001,6 +14823,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get user_deleteBrowsingDataTypeTabsTitle => 'Pestañas abiertas';
 
   @override
+  String get user_deleteBrowsingDataTypeTabsDescription =>
+      'Las pestañas bloqueadas se conservan';
+
+  @override
   String get user_deleteBrowsingDataTypeHistoryTitle =>
       'Historial de navegación';
 
@@ -14359,6 +15185,26 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
       'Sitios web que pueden enviarte notificaciones';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted =>
+      'Los datos de este sitio se están eliminando, así que se quitó su notificación';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      'El contenedor de este sitio está congelado, así que su notificación no se abrió. Púlsala de nuevo para reanudar el contenedor.';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      'La conexión de este sitio aún no está lista, así que su notificación no se abrió. Púlsala de nuevo en un momento.';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      'Todas las pestañas aisladas de este sitio están cerradas, así que su notificación no usaría la conexión de su contenedor y no se abrió.';
+
+  @override
+  String get webPush_notificationContainerDeleted =>
+      'El contenedor de este sitio se eliminó, así que se quitó su notificación';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Obtener datos de la página';
@@ -15239,6 +16085,33 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String units_pixels(String value) {
+    return '$value px';
+  }
+
+  @override
+  String units_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutos',
+      one: '1 minuto',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String units_hours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count horas',
+      one: '1 hora',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get visibilitySwitch_containersLabel => 'Contenedores';
 
   @override
@@ -15538,6 +16411,30 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get rememberedPrompt_startProxyConnectionKeywords =>
       'proxy, vpn, conexión, contenedor, iniciar, confirmación, no volver a preguntar';
+
+  @override
+  String get rememberedPrompt_sleepTabsLabel =>
+      'Preguntar antes de poner pestañas en suspensión';
+
+  @override
+  String get rememberedPrompt_sleepTabsDescription =>
+      'Explica que la página de una pestaña en suspensión se vuelve a cargar y puede perder el estado sin guardar';
+
+  @override
+  String get rememberedPrompt_sleepTabsKeywords =>
+      'suspender, suspensión, descargar, memoria, pestaña, descartar, confirmación, no volver a preguntar, sleep';
+
+  @override
+  String get rememberedPrompt_freezeContainerLabel =>
+      'Preguntar antes de congelar un contenedor';
+
+  @override
+  String get rememberedPrompt_freezeContainerDescription =>
+      'Explica que las pestañas de un contenedor congelado se descargan y su actividad en segundo plano se detiene hasta que se reanude';
+
+  @override
+  String get rememberedPrompt_freezeContainerKeywords =>
+      'congelar, pausar, contenedor, reanudar, segundo plano, push, confirmación, no volver a preguntar, freeze';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

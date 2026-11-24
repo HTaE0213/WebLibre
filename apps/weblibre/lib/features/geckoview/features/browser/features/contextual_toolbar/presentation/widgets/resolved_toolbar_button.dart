@@ -53,7 +53,7 @@ Widget buildResolvedToolbarButton(
   final child = def.builder(scope, context, ref);
   final built = button.isEnabled
       ? child
-      : Opacity(opacity: 0.38, child: IgnorePointer(child: child));
+      : UnavailableToolbarButton(child: child);
 
   final longPressAction = scope.isPreview
       ? null
@@ -87,6 +87,22 @@ Widget buildResolvedToolbarButton(
         ? null
         : () => runToolbarButtonGestureAction(ref, swipeDown),
     child: withLongPress,
+  );
+}
+
+/// A toolbar button whose primary action is unavailable and that no fallback
+/// replaced: greyed out, and out of reach of taps and of keyboard focus, so
+/// Tab and Enter cannot reach the callbacks it builds for itself either. A
+/// long press bound around it ([ToolbarLongPressOverride]) still fires.
+class UnavailableToolbarButton extends StatelessWidget {
+  const UnavailableToolbarButton({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Opacity(
+    opacity: 0.38,
+    child: IgnorePointer(child: ExcludeFocus(child: child)),
   );
 }
 

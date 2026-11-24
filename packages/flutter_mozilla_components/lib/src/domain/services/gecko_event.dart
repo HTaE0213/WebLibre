@@ -20,7 +20,15 @@ typedef IconUpdateEvent = ({String url, Uint8List bytes});
 typedef ThumbnailEvent = ({String tabId, Uint8List? bytes});
 typedef FindResultsEvent = ({String tabId, List<FindResultState> results});
 typedef LongPressEvent = ({String tabId, HitResult hitResult});
-typedef TabAddedEvent = ({String tabId, String? parentId});
+typedef TabAddedEvent = ({
+  String tabId,
+  String? parentId,
+  String? contextId,
+  bool openedByServiceWorker,
+});
+
+/// A freeze's teardown progress (barrier 4): [done] of [total] tabs.
+typedef ContextFreezeProgress = ({String ownerId, int done, int total});
 typedef ScrollEvent = ({String tabId, int scrollY});
 typedef ManifestUpdateEvent = ({String tabId, PwaManifest? manifest});
 typedef TabTranslationEvent = ({String tabId, TabTranslationStateData state});
@@ -83,6 +91,30 @@ class GeckoEventService extends GeckoStateEvents {
   final _tabTranslationSubject =
       LatestPerKeySubject<String, TabTranslationEvent>((event) => event.tabId);
 
+  /// Each tab's lifecycle (residency, sleep hold), replayed to a late listener.
+  final _tabLifecycleSubject = LatestPerKeySubject<String, TabLifecycleState>(
+    (event) => event.tabId,
+  );
+
+  /// Wake presses on a sleeping tab's placeholder; Dart checks routing, then
+  /// wakes.
+  final _wakeRequestSubject = PublishSubject<String>();
+
+  /// The freeze registry as native last reported it, for what the user sees.
+  /// The membership gate reads its own snapshot instead (D27).
+  final _contextFreezeSubject = BehaviorSubject<LifecycleSnapshot>();
+
+  /// Resume presses on a frozen tab's placeholder; Dart checks routing for
+  /// every context, then resumes.
+  final _resumeRequestSubject = PublishSubject<String>();
+  final _containerFreezeDueSubject = PublishSubject<String>();
+
+  /// Teardown progress of running freezes, newest per container.
+  final _freezeProgressSubject =
+      LatestPerKeySubject<String, ContextFreezeProgress>(
+        (event) => event.ownerId,
+      );
+
   /// The tabs of the last accepted tab list, to tell which tabs a new one
   /// closed.
   var _listedTabs = <String>{};
@@ -121,6 +153,18 @@ class GeckoEventService extends GeckoStateEvents {
       _translationEngineSubject.stream;
   Stream<TabTranslationEvent> get tabTranslationEvents =>
       _tabTranslationSubject.stream;
+  Stream<TabLifecycleState> get tabLifecycleEvents =>
+      _tabLifecycleSubject.stream;
+  Stream<String> get wakeRequestEvents => _wakeRequestSubject.stream;
+  ValueStream<LifecycleSnapshot> get contextFreezeEvents =>
+      _contextFreezeSubject.stream;
+  Stream<String> get resumeRequestEvents => _resumeRequestSubject.stream;
+
+  /// Containers due for an automatic freeze, by id (phase C2).
+  Stream<String> get containerFreezeDueEvents =>
+      _containerFreezeDueSubject.stream;
+  Stream<ContextFreezeProgress> get contextFreezeProgressEvents =>
+      _freezeProgressSubject.stream;
 
   @override
   Future<void> onViewReadyStateChange(int sequence, bool state) async {
@@ -150,6 +194,7 @@ class GeckoEventService extends GeckoStateEvents {
       _securityInfoSubject,
       _readerableSubject,
       _tabTranslationSubject,
+      _tabLifecycleSubject,
     ]) {
       subject.retainKeys(openTabs);
     }
@@ -167,6 +212,7 @@ class GeckoEventService extends GeckoStateEvents {
       _longPressSubject,
       _manifestUpdateSubject,
       _proxyLoadErrorSubject,
+      _wakeRequestSubject,
     ]) {
       subject.forgetSequences(closedTabs);
     }
@@ -191,6 +237,51 @@ class GeckoEventService extends GeckoStateEvents {
     TabContentState state,
   ) async {
     _tabContentSubject.addWhenMoreRecent(sequence, state.id, state);
+  }
+
+  @override
+  Future<void> onTabLifecycleChange(
+    int sequence,
+    TabLifecycleState state,
+  ) async {
+    _tabLifecycleSubject.addWhenMoreRecent(sequence, state.tabId, state);
+  }
+
+  @override
+  Future<void> onWakeRequested(int sequence, String tabId) async {
+    _wakeRequestSubject.addWhenMoreRecent(sequence, tabId, tabId);
+  }
+
+  @override
+  Future<void> onContextFreezeChange(
+    int sequence,
+    LifecycleSnapshot snapshot,
+  ) async {
+    _contextFreezeSubject.addWhenMoreRecent(sequence, null, snapshot);
+  }
+
+  @override
+  Future<void> onResumeRequested(int sequence, String tabId) async {
+    _resumeRequestSubject.addWhenMoreRecent(sequence, tabId, tabId);
+  }
+
+  @override
+  Future<void> onContainerFreezeDue(int sequence, String ownerId) async {
+    _containerFreezeDueSubject.addWhenMoreRecent(sequence, ownerId, ownerId);
+  }
+
+  @override
+  Future<void> onContextFreezeProgress(
+    int sequence,
+    String ownerId,
+    int done,
+    int total,
+  ) async {
+    _freezeProgressSubject.addWhenMoreRecent(sequence, ownerId, (
+      ownerId: ownerId,
+      done: done,
+      total: total,
+    ));
   }
 
   @override
@@ -278,10 +369,18 @@ class GeckoEventService extends GeckoStateEvents {
   }
 
   @override
-  Future<void> onTabAdded(int sequence, String tabId, String? parentId) async {
+  Future<void> onTabAdded(
+    int sequence,
+    String tabId,
+    String? parentId,
+    String? contextId,
+    bool openedByServiceWorker,
+  ) async {
     _tabAddedSubject.addWhenMoreRecent(sequence, null, (
       tabId: tabId,
       parentId: parentId,
+      contextId: contextId,
+      openedByServiceWorker: openedByServiceWorker,
     ));
   }
 
@@ -410,6 +509,12 @@ class GeckoEventService extends GeckoStateEvents {
     await _tabListSubject.close();
     await _selectedTabSubject.close();
     await _tabContentSubject.close();
+    await _tabLifecycleSubject.close();
+    await _wakeRequestSubject.close();
+    await _contextFreezeSubject.close();
+    await _resumeRequestSubject.close();
+    await _containerFreezeDueSubject.close();
+    await _freezeProgressSubject.close();
     await _historySubject.close();
     await _readerableSubject.close();
     await _securityInfoSubject.close();

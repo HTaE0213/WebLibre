@@ -1378,6 +1378,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
         (value) => value.value ?? const <String>{},
       ),
     );
+    final lockedTabIds = ref.watch(effectivelyLockedTabIdsProvider).value;
     final restoreComplete = ref.watch(browserRestoreCompleteProvider);
     final nativeTabIds = ref
         .watch(
@@ -1392,6 +1393,7 @@ class QuickTabSwitcher extends HookConsumerWidget {
             state,
             selectedTabId: selectedTabId,
             pinnedTabIds: pinnedTabIds,
+            lockedTabIds: lockedTabIds,
             tabDepthById: tabDepthById,
             sandboxSourceUri: sandboxSourceUris[state.$1.id],
             isPlaceholder:
@@ -1626,6 +1628,8 @@ class QuickTabSwitcherView extends StatelessWidget {
       !item.isHistory &&
       !item.isPlaceholder &&
       !item.isGroup &&
+      // A locked tab does not close.
+      !item.isLocked &&
       closeButtonMode.showsFor(isActive: item.isActive);
 
   bool get _isVertical => axis == Axis.vertical;

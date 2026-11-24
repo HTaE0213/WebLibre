@@ -66,7 +66,7 @@ final class ContainerProxyRepositoryProvider
 }
 
 String _$containerProxyRepositoryHash() =>
-    r'4a3768388ca29c473f9ad40712e940955967299f';
+    r'21afa995c347f25cb6f479a0b683246e0b59ab5c';
 
 /// Pushes the app's routing state into Gecko's proxy extension.
 ///

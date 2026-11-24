@@ -1658,11 +1658,11 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get appUpdate_installDialogBody =>
-      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya.';
+      'Android akan meminta konfirmasi pembaruan. Lalu WebLibre akan ditutup untuk menginstalnya. Buka kembali setelahnya.';
 
   @override
   String get appUpdate_installDialogBodyPrivateTabs =>
-      'WebLibre akan ditutup untuk menginstal pembaruan. Buka kembali setelahnya. Tab pribadi akan ditutup.';
+      'Android akan meminta konfirmasi pembaruan. Lalu WebLibre akan ditutup untuk menginstalnya. Buka kembali setelahnya. Tab pribadi akan ditutup.';
 
   @override
   String get bangs_menuTitle => 'Bang';
@@ -2062,6 +2062,13 @@ class AppLocalizationsId extends AppLocalizations {
       'Ubah status sematan tab saat ini';
 
   @override
+  String get browserActions_toggleLockTabTitle => 'Kunci / Buka Kunci Tab';
+
+  @override
+  String get browserActions_toggleLockTabDescription =>
+      'Cegah tab saat ini ditutup, atau izinkan lagi';
+
+  @override
   String get browserActions_moveTabBackwardTitle => 'Pindahkan Tab Mundur';
 
   @override
@@ -2203,12 +2210,22 @@ class AppLocalizationsId extends AppLocalizations {
   String get browserActions_tabUnpinnedMessage => 'Sematan tab dilepas';
 
   @override
+  String get browserActions_tabLockedMessage => 'Tab dikunci';
+
+  @override
+  String get browserActions_tabUnlockedMessage => 'Kunci tab dibuka';
+
+  @override
   String get browserActions_homeScreenUnavailableMessage =>
       'Halaman ini tidak dapat ditambahkan ke layar utama';
 
   @override
   String get browserActions_readerViewUnavailableMessage =>
       'Mode pembaca tidak tersedia untuk halaman ini';
+
+  @override
+  String get browserActions_pageAsleepMessage =>
+      'Tab ini sedang tidur. Bangunkan dulu.';
 
   @override
   String get browserActions_noClosedTabsMessage =>
@@ -2579,6 +2596,10 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get browserActions_togglePinTabKeywords =>
       'sematkan tab, lepas sematan, pin tab, unpin';
+
+  @override
+  String get browserActions_toggleLockTabKeywords =>
+      'kunci tab, buka kunci, tetap terbuka, lindungi, cegah penutupan, lock';
 
   @override
   String get browserActions_closeTabKeywords => 'tutup, hapus tab, close';
@@ -3400,6 +3421,10 @@ class AppLocalizationsId extends AppLocalizations {
       'Tutup tab ini setelah data dihapus';
 
   @override
+  String get browser_closeTabAfterClearingLocked =>
+      'Buka kunci tab untuk menutupnya setelah penghapusan';
+
+  @override
   String get browser_clearingEllipsis => 'Menghapus...';
 
   @override
@@ -3651,6 +3676,465 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get browser_unpinTab => 'Lepas sematan tab';
+
+  @override
+  String get browser_lockTab => 'Kunci tab';
+
+  @override
+  String get browser_unlockTab => 'Buka kunci tab';
+
+  @override
+  String get browser_tabLockedLabel => 'Terkunci';
+
+  @override
+  String get browser_tabUnlockIncompleteLabel =>
+      'Terkunci, pembukaan kunci tidak selesai';
+
+  @override
+  String get browser_retryUnlockTab => 'Coba buka kunci tab lagi';
+
+  @override
+  String get browser_tabUnlockIncompleteMessage =>
+      'Pembukaan kunci tidak selesai. Tab tetap terkunci sampai selesai.';
+
+  @override
+  String get browser_tabLockFailed => 'Tab ini tidak dapat dikunci';
+
+  @override
+  String get browser_tabUnlockFailed => 'Kunci tab ini tidak dapat dibuka';
+
+  @override
+  String get browser_tabLockPrivate => 'Tab pribadi tidak dapat dikunci';
+
+  @override
+  String get browser_lockedTabCannotMove =>
+      'Buka kunci tab ini untuk memindahkannya ke kontainer dengan penyimpanan sendiri';
+
+  @override
+  String get browser_tabMoveFailed => 'Tab tidak dipindahkan. Coba lagi.';
+
+  @override
+  String get browser_containerBeingDeleted => 'Kontainer ini sedang dihapus';
+
+  @override
+  String get browser_containerFrozen => 'Lanjutkan kontainer terlebih dahulu';
+
+  @override
+  String get browser_tabIsLocked => 'Tab ini terkunci';
+
+  @override
+  String get browser_closeFailed => 'Tidak ada yang ditutup. Coba lagi.';
+
+  @override
+  String browser_lockedTabsKept(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tab terkunci dipertahankan',
+      one: 'Tab ini terkunci',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_tabsClosedKeptLocked(int closed, int locked) {
+    String _temp0 = intl.Intl.pluralLogic(
+      closed,
+      locale: localeName,
+      other: '$closed tab ditutup.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      locked,
+      locale: localeName,
+      other: '$locked tab terkunci dipertahankan.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_menuSleepAllTabs => 'Tidurkan Semua Tab';
+
+  @override
+  String get browser_sleepTab => 'Tidurkan';
+
+  @override
+  String get browser_sleepTabDescription =>
+      'Membebaskan memori dengan melepas halaman. Halaman dimuat lagi saat Anda membangunkan tab. Sebagian status halaman yang belum disimpan dapat hilang.';
+
+  @override
+  String browser_sleepTabsConfirmTitle(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tidurkan $count tab?',
+      one: 'Tidurkan tab ini?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_wakeTab => 'Bangunkan tab';
+
+  @override
+  String get browser_wakeTabRoutingNotReady =>
+      'Koneksi tab ini belum siap, sehingga tab tetap tidur';
+
+  @override
+  String get browser_tabAsleepLabel => 'Tidur';
+
+  @override
+  String get browser_sleepAskTitle => 'Tetap tidurkan?';
+
+  @override
+  String browser_sleepAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tab sedang memutar media. Menidurkannya akan menghentikan pemutaran.',
+      one:
+          'Tab ini sedang memutar media. Menidurkannya akan menghentikan pemutaran.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count halaman adalah hasil pengiriman formulir. Saat dimuat ulang, formulir tidak dikirim lagi, sehingga halaman mungkin tidak kembali seperti semula.',
+      one:
+          'Halaman ini adalah hasil pengiriman formulir. Saat dimuat ulang, formulir tidak dikirim lagi, sehingga halaman mungkin tidak kembali seperti semula.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tab memiliki teks yang diketik di formulir. Menidurkannya dapat menghilangkan teks tersebut.',
+      one:
+          'Tab ini memiliki teks yang diketik di formulir. Menidurkannya dapat menghilangkan teks tersebut.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_sleepTabsPartial(int slept, int kept) {
+    String _temp0 = intl.Intl.pluralLogic(
+      slept,
+      locale: localeName,
+      other: '$slept tab ditidurkan.',
+      zero: 'Tidak ada tab yang ditidurkan.',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      kept,
+      locale: localeName,
+      other: '$kept tab tetap aktif karena sedang digunakan.',
+    );
+    return '$_temp0 $_temp1';
+  }
+
+  @override
+  String get browser_sleepTabFailed => 'Tab ini tidak dapat ditidurkan';
+
+  @override
+  String get browser_sleepRefusedRecording =>
+      'Tab ini sedang menggunakan kamera, mikrofon, atau berbagi layar, sehingga tidak ditidurkan';
+
+  @override
+  String get browser_sleepRefusedFormData =>
+      'Tab ini memiliki isian formulir yang akan hilang, sehingga tidak ditidurkan';
+
+  @override
+  String get browser_sleepRefusedUpload =>
+      'Sebuah berkas dipilih untuk diunggah di tab ini, sehingga tidak ditidurkan';
+
+  @override
+  String get browser_sleepRefusedPrintOrPdf =>
+      'Tab ini sedang dicetak atau disimpan sebagai PDF, sehingga tidak ditidurkan';
+
+  @override
+  String get browser_sleepRefusedDownload =>
+      'Unduhan dari tab ini masih berjalan, sehingga tidak ditidurkan';
+
+  @override
+  String get browser_freezeContainer => 'Bekukan kontainer';
+
+  @override
+  String get browser_menuFreezeContainer => 'Bekukan Kontainer';
+
+  @override
+  String browser_freezeContainerTitle(String container) {
+    return 'Bekukan kontainer \"$container\"?';
+  }
+
+  @override
+  String get browser_freezeContainerDescription =>
+      'Melepas tab-tabnya dari memori dan menghentikan apa yang dilakukan situsnya di latar belakang, seperti pesan push dan service worker, sampai Anda melanjutkannya. Kuki, sesi masuk, dan data situs tetap disimpan. Tab baru yang dibuka di dalamnya menunggu sampai saat itu. Pesan push yang dikirim selama itu dilewati.';
+
+  @override
+  String get browser_resumeContainer => 'Lanjutkan Kontainer';
+
+  @override
+  String get browser_stopFreezing => 'Hentikan Pembekuan dan Lanjutkan';
+
+  @override
+  String get browser_retryFreeze => 'Coba Bekukan Lagi';
+
+  @override
+  String get browser_containerFrozenLabel => 'Dibekukan';
+
+  @override
+  String get browser_containerFreezing => 'Membekukan…';
+
+  @override
+  String browser_containerFreezingProgress(int done, int total) {
+    return 'Membekukan… $done dari $total';
+  }
+
+  @override
+  String get browser_containerResuming => 'Melanjutkan…';
+
+  @override
+  String get browser_freezeIncompleteLabel => 'Pembekuan belum selesai';
+
+  @override
+  String get browser_resumeIncompleteLabel => 'Pelanjutan belum selesai';
+
+  @override
+  String get browser_freezeIncompleteBlocked =>
+      'Pembekuan belum selesai: aktivitas baru diblokir, sebagian aktivitas yang sudah berjalan mungkin belum berhenti';
+
+  @override
+  String get browser_freezeIncompleteUncertain =>
+      'Pembekuan belum selesai: aktivitas latar belakang mungkin tidak diblokir';
+
+  @override
+  String get browser_resumeIncompleteBlocked =>
+      'Pelanjutan belum selesai: masih diblokir, lanjutkan lagi';
+
+  @override
+  String get browser_resumeIncompleteLifted =>
+      'Pelanjutan belum selesai: aktivitas latar belakang mungkin sudah berjalan';
+
+  @override
+  String get browser_freezeNeedsOwnStorage =>
+      'Memerlukan penyimpanan kuki sendiri';
+
+  @override
+  String get browser_freezeSharedStorage =>
+      'Tab terisolasi di kontainer ini berbagi penyimpanan dengan tab di luarnya, sehingga tidak dapat dibekukan';
+
+  @override
+  String get browser_resumeSharedWithFrozen =>
+      'Tab terisolasi dari kontainer lain yang dibekukan berbagi penyimpanan dengan kontainer ini. Lanjutkan kontainer itu terlebih dahulu.';
+
+  @override
+  String get browser_freezeRecoveryPending =>
+      'Kontainer yang dibekukan sedang dipulihkan. Coba lagi sebentar lagi.';
+
+  @override
+  String get browser_undoWaitsForSiteData =>
+      'Tab ini tidak dapat dibuka kembali sampai data situsnya dihapus';
+
+  @override
+  String get browser_resumeFreezeStateUnknown =>
+      'Kontainer tidak dilanjutkan karena WebLibre tidak dapat memeriksa apa yang dibekukan. Coba lagi.';
+
+  @override
+  String get browser_freezeBusy =>
+      'Kontainer ini sedang sibuk. Coba lagi sebentar lagi.';
+
+  @override
+  String browser_containerFrozenDone(String container) {
+    return 'Kontainer \"$container\" dibekukan';
+  }
+
+  @override
+  String browser_containerResumedDone(String container) {
+    return 'Kontainer \"$container\" dilanjutkan';
+  }
+
+  @override
+  String get browser_freezeFailedShared =>
+      'Tab di luar kontainer ini menggunakan penyimpanannya, sehingga kontainer tidak dibekukan';
+
+  @override
+  String get browser_freezeFailedMembershipChanged =>
+      'Sebuah tab masuk ke kontainer ini selama proses, sehingga kontainer tidak dibekukan. Coba lagi.';
+
+  @override
+  String get browser_freezeFailedMemberOutside =>
+      'Ada tab di kontainer ini yang tidak menggunakan penyimpanannya, sehingga kontainer tidak dibekukan. Tutup tab tersebut atau pindahkan ke kontainer lain, lalu coba lagi.';
+
+  @override
+  String get browser_freezeFailedExternalWindow =>
+      'Aplikasi web atau tab kustom milik kontainer ini sedang terbuka. Tutup, lalu coba lagi.';
+
+  @override
+  String get browser_freezeFailedEngineRefused =>
+      'Mesin peramban menolak membekukan kontainer ini. Tidak ada yang diubah.';
+
+  @override
+  String get browser_freezeFailedNotPersisted =>
+      'Status beku tidak dapat disimpan, sehingga kontainer tidak dibekukan';
+
+  @override
+  String get browser_freezeFailedQuiescence =>
+      'Pembekuan belum selesai: sebagian aktivitas tidak berhenti tepat waktu. Aktivitas baru diblokir; lanjutkan atau coba lagi.';
+
+  @override
+  String get browser_freezeFailedGeneric =>
+      'Pembekuan kontainer ini belum selesai. Lanjutkan atau coba lagi.';
+
+  @override
+  String get browser_resumeRoutingNotReady =>
+      'Koneksi kontainer ini belum siap, sehingga tetap dibekukan';
+
+  @override
+  String get browser_resumeIsolationCleanupFailed =>
+      'Data tab terisolasi yang sudah ditutup tidak dapat dihapus lebih dulu, sehingga kontainer tetap dibekukan. Coba lagi.';
+
+  @override
+  String get browser_resumeFailedBlocked =>
+      'Pelanjutan belum selesai. Kontainer masih dibekukan; coba lagi.';
+
+  @override
+  String get browser_resumeFailedLifted =>
+      'Pelanjutan belum selesai. Situsnya mungkin sudah berjalan di latar belakang; coba lagi.';
+
+  @override
+  String get browser_freezeBlockedTitle =>
+      'Kontainer ini belum dapat dibekukan';
+
+  @override
+  String get browser_freezeBlockedRecording =>
+      'Menggunakan kamera, mikrofon, atau berbagi layar';
+
+  @override
+  String get browser_freezeBlockedFormData =>
+      'Memiliki isian formulir yang akan hilang';
+
+  @override
+  String get browser_freezeBlockedUpload =>
+      'Sebuah berkas dipilih untuk diunggah';
+
+  @override
+  String get browser_freezeBlockedPrintOrPdf =>
+      'Sedang dicetak atau disimpan sebagai PDF';
+
+  @override
+  String get browser_freezeBlockedDownload =>
+      'Unduhan dari kontainer ini masih berjalan';
+
+  @override
+  String get browser_freezeBlockedUnattributedDownload =>
+      'Ada unduhan berjalan yang kontainernya tidak diketahui';
+
+  @override
+  String get browser_freezeBlockedTabGone => 'Tab yang ditutup';
+
+  @override
+  String get browser_freezeBlockedShowTab => 'Tampilkan tab';
+
+  @override
+  String get browser_freezeBlockedViewDownloads => 'Lihat unduhan';
+
+  @override
+  String get browser_freezeAskTitle => 'Tetap bekukan?';
+
+  @override
+  String browser_freezeAskMedia(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tab di kontainer ini sedang memutar media. Pembekuan akan menghentikan pemutaran.',
+      one:
+          'Satu tab di kontainer ini sedang memutar media. Pembekuan akan menghentikan pemutaran.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskPostResult(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count halaman di kontainer ini adalah hasil pengiriman formulir. Saat dimuat ulang setelah dilanjutkan, formulir tidak dikirim lagi, sehingga halaman mungkin tidak kembali seperti semula.',
+      one:
+          'Satu halaman di kontainer ini adalah hasil pengiriman formulir. Saat dimuat ulang setelah dilanjutkan, formulir tidak dikirim lagi, sehingga halaman mungkin tidak kembali seperti semula.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_freezeAskFormData(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count tab di kontainer ini memiliki teks yang diketik di formulir. Pembekuan dapat menghilangkan teks tersebut.',
+      one:
+          'Satu tab di kontainer ini memiliki teks yang diketik di formulir. Pembekuan dapat menghilangkan teks tersebut.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String browser_resumeAndOpenTitle(String container) {
+    return 'Lanjutkan kontainer \"$container\" dan buka?';
+  }
+
+  @override
+  String get browser_resumeAndOpenContent =>
+      'Kontainer ini dibekukan, sehingga tidak ada yang dimuat di dalamnya sampai dilanjutkan.';
+
+  @override
+  String get browser_resumeAndOpen => 'Lanjutkan dan buka';
+
+  @override
+  String get browser_resumeAndOpenCancelled =>
+      'Tidak ada yang dibuka. Kontainer tetap dibekukan.';
+
+  @override
+  String get browser_containerFrozenToBeSafeLabel =>
+      'Dibekukan demi keamanan setelah catatan rusak';
+
+  @override
+  String get browser_frozenToBeSafeTitle => 'Kontainer dibekukan demi keamanan';
+
+  @override
+  String browser_frozenToBeSafeContent(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Catatan WebLibre tentang kontainer mana yang dibekukan rusak, jadi demi keamanan WebLibre membekukan semua $count kontainer yang memiliki penyimpanan kuki sendiri. Lanjutkan masing-masing saat Anda ingin situsnya berjalan lagi.',
+      one:
+          'Catatan WebLibre tentang kontainer mana yang dibekukan rusak, jadi demi keamanan WebLibre membekukan kontainer yang memiliki penyimpanan kuki sendiri. Lanjutkan kontainer tersebut saat Anda ingin situsnya berjalan lagi.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get browser_frozenToBeSafeShowContainers => 'Tampilkan kontainer';
+
+  @override
+  String get browser_freezeRecoveryFailed =>
+      'WebLibre tidak dapat memulihkan daftar kontainer yang dibekukan, sehingga untuk sementara semua kontainer tetap dibekukan';
+
+  @override
+  String browser_containerDeletionNotFinished(String container) {
+    return 'Penghapusan kontainer \"$container\" belum selesai, sehingga kontainer masih ada';
+  }
 
   @override
   String get browser_pinTab => 'Sematkan tab';
@@ -4023,6 +4507,37 @@ class AppLocalizationsId extends AppLocalizations {
       'Tidak ada tab untuk dipilih di sini';
 
   @override
+  String get browser_keepTabAwake => 'Tetap aktif';
+
+  @override
+  String get browser_allowTabSleeping => 'Izinkan tidur';
+
+  @override
+  String get browser_keepTabAwakeDescription =>
+      'Tidur otomatis dan pembekuan otomatis melewati tab yang dijaga tetap aktif. Anda tetap dapat menidurkannya atau membekukan kontainernya secara manual.';
+
+  @override
+  String get browser_pinTabShort => 'Sematkan';
+
+  @override
+  String get browser_unpinTabShort => 'Lepas';
+
+  @override
+  String get browser_lockTabShort => 'Kunci';
+
+  @override
+  String get browser_unlockTabShort => 'Buka kunci';
+
+  @override
+  String get browser_sleepTabShort => 'Tidurkan';
+
+  @override
+  String get browser_wakeTabShort => 'Bangunkan';
+
+  @override
+  String get browser_tabKeptAwakeLabel => 'Dijaga tetap aktif';
+
+  @override
   String get contextualToolbar_tooltipHome => 'Beranda';
 
   @override
@@ -4223,6 +4738,11 @@ class AppLocalizationsId extends AppLocalizations {
   String get menu_itemMoreDisclosure => 'Lainnya';
 
   @override
+  String menu_moreDisclosureSummary(String items, int count) {
+    return '$items dan $count lainnya';
+  }
+
+  @override
   String get menu_itemCloneTab => 'Duplikat Tab';
 
   @override
@@ -4254,6 +4774,12 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get menu_itemPinTopSite => 'Sematkan ke Pintasan';
+
+  @override
+  String get menu_itemLockTab => 'Kunci Tab';
+
+  @override
+  String get menu_itemSleepTab => 'Tidurkan Tab';
 
   @override
   String get menu_itemFetchFeeds => 'Ambil Umpan';
@@ -4508,6 +5034,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get menu_pinUpdateFailed => 'Gagal memperbarui Pintasan';
+
+  @override
+  String get menu_lockTab => 'Kunci Tab';
+
+  @override
+  String get menu_unlockTab => 'Buka Kunci Tab';
+
+  @override
+  String get menu_retryUnlockTab => 'Coba Buka Kunci Tab Lagi';
+
+  @override
+  String get menu_sleepTab => 'Tidurkan Tab';
+
+  @override
+  String get menu_wakeTab => 'Bangunkan Tab';
 
   @override
   String get menu_fetchFeedsTitle => 'Ambil Umpan di Halaman';
@@ -5796,6 +6337,67 @@ class AppLocalizationsId extends AppLocalizations {
   String get splitView_crashedReload => 'Muat ulang';
 
   @override
+  String get splitView_sleepingTitle => 'Tab ini sedang tidur';
+
+  @override
+  String get splitView_sleepingWake => 'Bangunkan';
+
+  @override
+  String get splitView_frozenTitle => 'Kontainer ini dibekukan';
+
+  @override
+  String splitView_frozenTitleNamed(String container) {
+    return 'Kontainer \"$container\" dibekukan';
+  }
+
+  @override
+  String splitView_freezingTitleNamed(String container) {
+    return 'Membekukan kontainer \"$container\"…';
+  }
+
+  @override
+  String splitView_freezeIncompleteTitleNamed(String container) {
+    return 'Pembekuan kontainer \"$container\" tidak selesai';
+  }
+
+  @override
+  String splitView_resumingTitleNamed(String container) {
+    return 'Melanjutkan kontainer \"$container\"…';
+  }
+
+  @override
+  String splitView_resumeIncompleteTitleNamed(String container) {
+    return 'Pelanjutan kontainer \"$container\" tidak selesai';
+  }
+
+  @override
+  String get splitView_frozenResume => 'Lanjutkan';
+
+  @override
+  String splitView_frozenSkippedMessages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count pesan latar belakang dilewati. Pesan yang dilewati tidak dikirim setelah dilanjutkan.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String splitView_frozenToBeSafeTitleNamed(String container) {
+    return 'Kontainer \"$container\" dibekukan demi keamanan';
+  }
+
+  @override
+  String get splitView_frozenToBeSafeDetail =>
+      'Catatan kontainer yang dibekukan milik WebLibre rusak. Lanjutkan untuk memuat tab ini.';
+
+  @override
+  String get splitView_frozenRecoveryTitle =>
+      'Dibekukan sampai WebLibre selesai memulihkan daftar kontainer yang dibekukan';
+
+  @override
   String get splitView_couldNotOpen => 'Tidak dapat membuka tampilan terpisah';
 
   @override
@@ -5844,6 +6446,119 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get tabs_deleteContainerHistoryKeptNote =>
       'Jika tidak dicentang, kunjungan tetap ada di riwayat tetapi tidak lagi ditetapkan ke kontainer.';
+
+  @override
+  String get tabs_deleteContainerAlsoDeleteSiteData => 'Hapus juga data situs';
+
+  @override
+  String get tabs_deleteContainerSiteDataNote =>
+      'Kuki, sesi masuk, data luring, dan langganan notifikasi';
+
+  @override
+  String get tabs_deleteContainerSiteDataFrozenNote =>
+      'Data kontainer yang dibekukan ikut dihapus bersamanya, sehingga aktivitas latar belakangnya tidak akan pernah berlanjut.';
+
+  @override
+  String get tabs_siteDataPendingTitle => 'Data situs yang menunggu dihapus';
+
+  @override
+  String get tabs_siteDataPendingExplanation =>
+      'Sampai datanya dihapus, situs dari kontainer ini tetap diblokir. Penghapusan dicoba lagi setiap kali aplikasi dimulai.';
+
+  @override
+  String get tabs_siteDataPendingDeletedContainer => 'Kontainer yang dihapus';
+
+  @override
+  String tabs_siteDataPendingClosedIsolatedTabs(String container) {
+    return 'Tab terisolasi yang ditutup di $container';
+  }
+
+  @override
+  String get tabs_siteDataPendingOrphaned => 'Kontainer sudah tidak ada';
+
+  @override
+  String get tabs_siteDataPendingDelete => 'Hapus data';
+
+  @override
+  String get tabs_siteDataPendingDeleting => 'Menghapus…';
+
+  @override
+  String get tabs_siteDataPendingDeleted => 'Data situs dihapus';
+
+  @override
+  String get tabs_siteDataPendingFailed =>
+      'Data situs belum dapat dihapus. Akan dicoba lagi saat aplikasi dimulai berikutnya.';
+
+  @override
+  String tabs_siteDataPendingCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count area penyimpanan',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_freezeRecoveryTitle => 'Memulihkan kontainer yang dibekukan';
+
+  @override
+  String get tabs_freezeRecoveryRestoring =>
+      'Catatan WebLibre tentang kontainer mana yang dibekukan rusak. Sampai dipulihkan, setiap kontainer dengan penyimpanan kuki sendiri tetap dibekukan.';
+
+  @override
+  String get tabs_freezeRecoveryFailed =>
+      'Catatan WebLibre tentang kontainer mana yang dibekukan rusak, dan pemulihannya belum selesai. Sampai selesai, setiap kontainer dengan penyimpanan kuki sendiri tetap dibekukan.';
+
+  @override
+  String tabs_deleteContainerLockedTabs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Ada $count tab terkunci di kontainer ini. Buka kunci tab tersebut sebelum menghapus kontainer ini.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_deleteContainerShowTabs => 'Tampilkan tab';
+
+  @override
+  String get tabs_deleteContainerIncomplete =>
+      'Beberapa tab di kontainer ini tidak dapat ditutup, sehingga kontainer dipertahankan';
+
+  @override
+  String get tabs_deleteContainerNotPersisted =>
+      'Kontainer tidak dihapus karena status bekunya tidak dapat disimpan. Coba lagi.';
+
+  @override
+  String get tabs_deleteContainerFreezeStateUnknown =>
+      'Kontainer tidak dihapus karena WebLibre tidak dapat memeriksa apakah kontainer tersebut dibekukan. Coba lagi.';
+
+  @override
+  String get tabs_deleteContainerSiteDataPending =>
+      'Kontainer dihapus; pembersihan data situs tertunda';
+
+  @override
+  String get tabs_deleteContainerOpenInWebApp =>
+      'Tutup dulu aplikasi web dan tab kustom milik kontainer ini';
+
+  @override
+  String get tabs_deleteContainerSharedStorage =>
+      'Tab terisolasi dari kontainer lain menggunakan penyimpanan kontainer yang dibekukan ini. Lanjutkan kontainer sebelum menghapusnya.';
+
+  @override
+  String get tabs_deleteContainerBusy =>
+      'Kontainer ini masih sedang diubah. Coba lagi sebentar lagi.';
+
+  @override
+  String get tabs_deleteContainerRecoveryPending =>
+      'Kontainer tidak dapat dihapus selama kontainer yang dibekukan sedang dipulihkan';
+
+  @override
+  String get tabs_deleteContainerHistoryFailed =>
+      'Kontainer dihapus, tetapi riwayatnya tidak dapat dihapus';
 
   @override
   String get tabs_deleteContainerButton => 'Hapus Kontainer';
@@ -6079,6 +6794,38 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get tabs_requiresCookieIsolation =>
       'Memerlukan isolasi kuki untuk diaktifkan';
+
+  @override
+  String get tabs_autoFreezeTitle => 'Bekukan Otomatis';
+
+  @override
+  String get tabs_autoFreezeOff => 'Nonaktif';
+
+  @override
+  String tabs_autoFreezeAfterMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Setelah tidak digunakan selama $count menit, dihitung saat WebLibre terbuka',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String tabs_autoFreezeAfterHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Setelah tidak digunakan selama $count jam, dihitung saat WebLibre terbuka',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tabs_autoFreezeExplanation =>
+      'Membekukan kontainer ini setelah tidak ada tab di dalamnya yang digunakan selama waktu yang Anda pilih. Hanya waktu saat WebLibre terbuka yang dihitung. Pembekuan melepas tab-tabnya dari memori dan menghentikan apa yang berjalan di latar belakang, termasuk notifikasi, sampai Anda melanjutkannya. Pembekuan ditunda selama salah satu tabnya memutar media, sedang dalam panggilan, memiliki unduhan, atau diatur ke \"Tetap aktif\". Teks yang diketik menundanya sampai kontainer tidak digunakan selama satu jam; setelah itu teks tersebut dapat hilang.';
 
   @override
   String get tabs_isolatedAppLinkSettings =>
@@ -10243,7 +10990,7 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get settings_autoClearUnassignedTabsSubtitle =>
-      'Tutup otomatis tab tanpa kontainer yang lebih lama dari jangka waktu yang dipilih';
+      'Tutup otomatis tab tanpa kontainer yang lebih lama dari jangka waktu yang dipilih. Tab yang dikunci tetap dipertahankan.';
 
   @override
   String get settings_durationNever => 'Jangan pernah';
@@ -12463,6 +13210,59 @@ class AppLocalizationsId extends AppLocalizations {
   String get settings_featureControlSectionTitle => 'Fitur';
 
   @override
+  String get settings_sleepingTabsSectionTitle => 'Tab Tidur';
+
+  @override
+  String get settings_autoSleepTabsTitle => 'Tidurkan Tab Otomatis';
+
+  @override
+  String get settings_autoSleepTabsSubtitle =>
+      'Selama WebLibre terbuka, melepas tab yang sudah lama tidak Anda lihat dari memori. Ketuk Bangunkan pada tab yang tidur untuk memuatnya lagi.';
+
+  @override
+  String get settings_autoSleepTabsKeywords =>
+      'tidur, lepas, memori, suspend, buang, siaga, tab tidak aktif, sleep';
+
+  @override
+  String get settings_autoSleepIdleTitle => 'Tidur Setelah';
+
+  @override
+  String get settings_autoSleepIdleSubtitle =>
+      'Berapa lama tab berada di luar layar sebelum ditidurkan';
+
+  @override
+  String get settings_autoSleepIdleKeywords =>
+      'tidur, batas waktu, siaga, tidak aktif, sleep';
+
+  @override
+  String get settings_residentTabLimitTitle => 'Batas Tab yang Dimuat';
+
+  @override
+  String get settings_residentTabLimitSubtitle =>
+      'Jika jumlah tab yang dimuat melebihi batas ini, tab yang paling lama tidak Anda lihat akan ditidurkan.';
+
+  @override
+  String get settings_residentTabLimitOneSubtitle =>
+      'Tab di layar selalu tetap dimuat. Tab lain ditidurkan setelah Anda meninggalkannya, kecuali tab tersebut dibuat tetap aktif, masih memuat, atau sedang digunakan.';
+
+  @override
+  String get settings_residentTabLimitKeywords =>
+      'batas, memori, tab dimuat, tidur, limit';
+
+  @override
+  String get settings_residentTabLimitOff => 'Tanpa Batas';
+
+  @override
+  String settings_residentTabLimitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tab',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get smallWeb_sheetTitle => 'Small Web';
 
   @override
@@ -13836,6 +14636,10 @@ class AppLocalizationsId extends AppLocalizations {
   String get user_deleteBrowsingDataTypeTabsTitle => 'Tab terbuka';
 
   @override
+  String get user_deleteBrowsingDataTypeTabsDescription =>
+      'Tab terkunci dipertahankan';
+
+  @override
   String get user_deleteBrowsingDataTypeHistoryTitle => 'Riwayat penjelajahan';
 
   @override
@@ -14189,6 +14993,26 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get webPush_indexSiteSubscriptionsSubtitle =>
       'Situs web yang diizinkan mengirimi Anda notifikasi';
+
+  @override
+  String get webPush_notificationSiteDataBeingDeleted =>
+      'Data situs ini sedang dihapus, sehingga notifikasinya dihapus';
+
+  @override
+  String get webPush_notificationContainerFrozen =>
+      'Kontainer situs ini dibekukan, sehingga notifikasinya tidak terbuka. Ketuk lagi untuk melanjutkan kontainer.';
+
+  @override
+  String get webPush_notificationRoutingNotReady =>
+      'Koneksi situs ini belum siap, sehingga notifikasinya tidak terbuka. Ketuk lagi sebentar lagi.';
+
+  @override
+  String get webPush_notificationGroupWithoutRoute =>
+      'Semua tab terisolasi situs ini sudah ditutup, sehingga notifikasinya tidak akan memakai koneksi kontainernya dan tidak dibuka.';
+
+  @override
+  String get webPush_notificationContainerDeleted =>
+      'Kontainer situs ini sudah dihapus, sehingga notifikasinya dihapus';
 
   @override
   String get webSearch_fetchPageDataTitle => 'Ambil Data Halaman';
@@ -15063,6 +15887,31 @@ class AppLocalizationsId extends AppLocalizations {
   }
 
   @override
+  String units_pixels(String value) {
+    return '$value px';
+  }
+
+  @override
+  String units_minutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count menit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String units_hours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count jam',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get visibilitySwitch_containersLabel => 'Kontainer';
 
   @override
@@ -15356,6 +16205,29 @@ class AppLocalizationsId extends AppLocalizations {
   @override
   String get rememberedPrompt_startProxyConnectionKeywords =>
       'proksi, proxy, vpn, koneksi, kontainer, mulai, konfirmasi, jangan tanya lagi';
+
+  @override
+  String get rememberedPrompt_sleepTabsLabel => 'Tanya sebelum menidurkan tab';
+
+  @override
+  String get rememberedPrompt_sleepTabsDescription =>
+      'Menjelaskan bahwa halaman tab yang tidur dimuat ulang dan dapat kehilangan status yang belum disimpan';
+
+  @override
+  String get rememberedPrompt_sleepTabsKeywords =>
+      'tidur, lepas, memori, tab, suspend, buang, konfirmasi, jangan tanya lagi, sleep';
+
+  @override
+  String get rememberedPrompt_freezeContainerLabel =>
+      'Tanya sebelum membekukan kontainer';
+
+  @override
+  String get rememberedPrompt_freezeContainerDescription =>
+      'Menjelaskan bahwa tab kontainer yang dibekukan dilepas dari memori dan aktivitas latar belakangnya berhenti sampai dilanjutkan';
+
+  @override
+  String get rememberedPrompt_freezeContainerKeywords =>
+      'bekukan, jeda, kontainer, lanjutkan, latar belakang, push, konfirmasi, jangan tanya lagi, freeze';
 
   @override
   String get speechToTextButton_serviceNotAvailable =>

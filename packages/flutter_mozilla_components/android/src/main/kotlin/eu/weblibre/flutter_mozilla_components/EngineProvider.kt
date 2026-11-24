@@ -8,8 +8,11 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.feature.ContainerProxyFeature
 import eu.weblibre.flutter_mozilla_components.feature.CookieManagerFeature
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import eu.weblibre.flutter_mozilla_components.feature.BrowserExtensionFeature
+import eu.weblibre.flutter_mozilla_components.feature.BuiltInExtensionInstalls
 import eu.weblibre.flutter_mozilla_components.feature.MLEngineFeature
+import eu.weblibre.flutter_mozilla_components.feature.ReadabilityExtractFeature
 import eu.weblibre.flutter_mozilla_components.feature.ReaderViewAppearanceFeature
 import eu.weblibre.flutter_mozilla_components.feature.SandboxCaptureFeature
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -50,6 +53,8 @@ sealed interface GeckoRuntimeState {
 }
 
 object EngineProvider {
+    private const val LOG_TAG = "WebLibreFreeze"
+
     private var state: GeckoRuntimeState = GeckoRuntimeState.NeverCreated
 
     @Synchronized
@@ -158,6 +163,19 @@ object EngineProvider {
                 }
             }
 
+            // E1: frozen containers are restricted from Gecko's first instruction,
+            // on every path that creates the runtime (5.6). Derived from the one
+            // durable record each time; Gecko never persists it.
+            TabLifecycleRegistry.attach(context)
+            val restricted = TabLifecycleRegistry.restrictedContexts()
+            if (restricted.isNotEmpty()) {
+                // Straight to logcat, under the tag the freeze checks read: AC's
+                // Logger goes through Dart once a Flutter engine is attached,
+                // and this is the line that shows E1 held on every kind of start.
+                android.util.Log.i(LOG_TAG, "Restricting session contexts from startup: $restricted")
+                builder.restrictedSessionContexts(restricted)
+            }
+
             val created = GeckoRuntime.create(context, builder.build())
             state = GeckoRuntimeState.Live(profileId, created)
             created
@@ -174,6 +192,9 @@ object EngineProvider {
         val runtime = getOrCreateRuntime(context)
 
         return GeckoEngine(context, defaultSettings, runtime).also {
+            // A5: a page of a restricted context opens no window, whichever
+            // session it runs in (process-wide in AC).
+            it.windowRequestGate = { openerContextId -> !TabLifecycleRegistry.isRestricted(openerContextId) }
             WebCompatFeature.install(it)
             //CookieManagerFeature.install(it)
             ContainerProxyFeature.install(it, stateEvents)
@@ -181,11 +202,15 @@ object EngineProvider {
             MLEngineFeature.install(it)
 
             //Install extensions early
-            BuiltInWebExtensionController(
-                "readability-extract@weblibre.eu",
-                "resource://android/assets/extensions/readability_extract/",
-                "mozacReaderExtract",
-            ).install(it)
+            BuiltInExtensionInstalls.install(
+                ReadabilityExtractFeature.READER_EXTRACT_EXTENSION_ID,
+                BuiltInWebExtensionController(
+                    ReadabilityExtractFeature.READER_EXTRACT_EXTENSION_ID,
+                    ReadabilityExtractFeature.READER_EXTRACT_EXTENSION_URL,
+                    ReadabilityExtractFeature.READER_EXTRACT_CONTENT_PORT,
+                ),
+                it,
+            )
 
             SandboxCaptureFeature.install(it)
 

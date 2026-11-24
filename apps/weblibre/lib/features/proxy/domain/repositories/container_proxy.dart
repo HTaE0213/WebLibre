@@ -67,6 +67,13 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
 
   var _generation = 0;
   ContainerRoutingSnapshot? _appliedSnapshot;
+  int? _appliedGeneration;
+
+  /// The generation the extension acknowledged for the snapshot
+  /// [applySnapshot] installed last; null before the first. Native keeps the
+  /// same number for what it holds, so an action Dart checked against one
+  /// snapshot can ask native whether it still holds that one.
+  int? appliedGeneration() => _appliedGeneration;
 
   /// Installs [snapshot] unless the extension already acknowledged an identical
   /// one. Throws if the extension does not acknowledge it.
@@ -89,6 +96,7 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
           .timeout(_snapshotAckTimeout);
 
       _appliedSnapshot = snapshot;
+      _appliedGeneration = _generation;
     });
   }
 
@@ -98,6 +106,13 @@ class ContainerProxyRepository extends _$ContainerProxyRepository {
     final status = await _service.routingStatus();
     return status.ready;
   }
+
+  /// Whether the routing in force covers every one of [contextIds] the way a
+  /// pane requires before it wakes a tab: direct, a live proxy, or one still
+  /// starting; never a proxy without an endpoint. False while none is in
+  /// force, so wait for it first ([waitUntilRoutingReady]).
+  Future<bool> routingCovers(List<String> contextIds) =>
+      _service.routingCoversContexts(contextIds);
 
   /// Waits until container routing is in force, up to [timeout].
   ///

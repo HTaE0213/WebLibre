@@ -37,11 +37,13 @@ import 'package:weblibre/features/geckoview/features/tabs/data/models/tab_summar
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/tab_parent_change.dart';
 
 class SyncTabsResult {
-  final Set<String> deletedIsolationContextIds;
+  /// The isolation contexts of the deleted rows, each with the containers of
+  /// its deleted rows (null for rows in none).
+  final Map<String, Set<String?>> deletedIsolationContainers;
   final int deletedCount;
 
   const SyncTabsResult({
-    required this.deletedIsolationContextIds,
+    required this.deletedIsolationContainers,
     required this.deletedCount,
   });
 }
@@ -51,6 +53,11 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   final _undoHistory = <String, TabData>{};
   final _pendingParentIds = <String, String>{};
   Timer? _clearHistoryTimer;
+
+  /// The row [tabId] gets back if an undo reopens it within a few seconds of
+  /// its row going ([syncTabs]); null once that passed, or for a tab whose
+  /// row did not go.
+  TabData? undoRowOf(String tabId) => _undoHistory[tabId];
 
   static const closedTabTombstoneTtl = Duration(hours: 24);
 
@@ -191,6 +198,16 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
         query.where(db.tab.id.isNotIn(excludedTabIds));
       }
     });
+  }
+
+  /// What wrote tab [tabId]'s row; null when it has none.
+  Future<TabSource?> getTabSource(String tabId) {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.source])
+      ..where(db.tab.id.equals(tabId));
+    return query
+        .map((row) => row.readWithConverter(db.tab.source))
+        .getSingleOrNull();
   }
 
   SingleOrNullSelectable<String?> getTabContainerId(String tabId) {
@@ -1840,10 +1857,12 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
           await (db.tab.delete()..where((t) => t.id.isNotIn(retainTabIds)))
               .goAndReturn();
 
-      final deletedIsolationContextIds = <String>{
-        for (final tab in deleted)
-          if (tab.isolationContextId != null) tab.isolationContextId!,
-      };
+      final deletedIsolationContainers = <String, Set<String?>>{};
+      for (final tab in deleted) {
+        if (tab.isolationContextId case final contextId?) {
+          (deletedIsolationContainers[contextId] ??= {}).add(tab.containerId);
+        }
+      }
 
       await _recordClosedTabContainers(deleted);
 
@@ -1890,7 +1909,7 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       await _resolvePendingParents(childPlacement: childPlacement);
 
       return SyncTabsResult(
-        deletedIsolationContextIds: deletedIsolationContextIds,
+        deletedIsolationContainers: deletedIsolationContainers,
         deletedCount: deleted.length,
       );
     });
@@ -1927,6 +1946,14 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return db.definitionsDrift.tabsInIsolationGroup(contextId: contextId);
   }
 
+  /// The containers of isolation group [contextId]'s tabs, null for tabs in
+  /// none; empty when it has no tab.
+  Future<List<String?>> containerIdsInIsolationGroup(String contextId) {
+    return db.definitionsDrift
+        .isolationGroupContainerIds(contextId: contextId)
+        .get();
+  }
+
   Selectable<String?> allIsolationContextIds() {
     return db.definitionsDrift.allIsolationContextIds();
   }
@@ -1934,6 +1961,23 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
   Selectable<IsolatedContextContainerPairsResult>
   isolatedContextContainerPairs() {
     return db.definitionsDrift.isolatedContextContainerPairs();
+  }
+
+  /// Every isolation context container [containerId]'s tabs use, shared with
+  /// tabs outside it or not.
+  Future<List<String>> isolationContextIdsInContainer(String containerId) {
+    return db.definitionsDrift
+        .isolationContextIdsInContainer(containerId: containerId)
+        .get()
+        .then((ids) => ids.nonNulls.toList());
+  }
+
+  /// The isolation contexts only container [containerId]'s tabs use.
+  Future<List<String>> isolationContextIdsOnlyInContainer(String containerId) {
+    return db.definitionsDrift
+        .isolationContextIdsOnlyInContainer(containerId: containerId)
+        .get()
+        .then((ids) => ids.nonNulls.toList());
   }
 
   Selectable<HistoryExclusionTabsResult> historyExclusionTabs() {
@@ -1945,12 +1989,111 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
     return statement.write(TabCompanion(isPinned: Value(pinned)));
   }
 
+  /// Sets "Keep awake" (D30) on [id].
+  Future<void> setSleepExempt(String id, {required bool exempt}) {
+    final statement = _updateByIdStatement(id);
+    return statement.write(TabCompanion(sleepExempt: Value(exempt)));
+  }
+
+  /// Every "Keep awake" tab, which automatic sleep leaves alone.
+  Selectable<String> getSleepExemptTabIds() {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(db.tab.sleepExempt.equals(true));
+
+    return query.map((row) => row.read(db.tab.id)!);
+  }
+
   Selectable<String> getPinnedTabIds() {
     final query = selectOnly(db.tab)
       ..addColumns([db.tab.id])
       ..where(db.tab.isPinned.equals(true));
 
     return query.map((row) => row.read(db.tab.id)!);
+  }
+
+  /// Locks [id] and returns how many rows changed: 0 when the tab has no row
+  /// yet or is private, which the caller counts as a failure.
+  ///
+  /// Also deletes the tab's closed-tab tombstone. A locked tab that comes back
+  /// from an undo or a restore must not be closed again as a stale restore.
+  Future<int> lockTab(String id) {
+    return transaction(() async {
+      final updated =
+          await (db.tab.update()..where(
+                (t) =>
+                    t.id.equals(id) &
+                    t.tabMode.equalsValue(TabModeDbValue.private).not(),
+              ))
+              .write(const TabCompanion(isLocked: Value(true)));
+      if (updated > 0) {
+        await deleteClosedTabTombstones([id]);
+      }
+      return updated;
+    });
+  }
+
+  /// Unlocks [id] and returns how many rows changed.
+  Future<int> unlockTab(String id) => _updateByIdStatement(
+    id,
+  ).write(const TabCompanion(isLocked: Value(false)));
+
+  /// Every locked tab, again whenever a lock changes.
+  Selectable<String> getLockedTabIds() {
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(db.tab.isLocked.equals(true));
+
+    return query.map((row) => row.read(db.tab.id)!);
+  }
+
+  /// Which of [tabIds] are locked.
+  Future<Set<String>> lockedTabIdsAmong(Iterable<String> tabIds) async {
+    final ids = tabIds.toSet();
+    if (ids.isEmpty) return const {};
+
+    final query = selectOnly(db.tab)
+      ..addColumns([db.tab.id])
+      ..where(db.tab.id.isIn(ids) & db.tab.isLocked.equals(true));
+
+    return (await query.map((row) => row.read(db.tab.id)!).get()).toSet();
+  }
+
+  /// Deletes container [id] only when every tab row still in it is one of
+  /// [closedTabIds] and none is locked, and returns how many rows went.
+  ///
+  /// The cascade on `tab.container_id` takes the rows still in the container
+  /// with it. A closed tab's row lingers until the next tab list sync, so the
+  /// caller names the tabs it closed; any other row is of a tab that is still
+  /// open (it joined after the caller last looked), and deleting the container
+  /// would leave that tab without its row. One statement, so nothing can join
+  /// between the check and the delete. The last guard behind the checks
+  /// `ContainerDeletion.delete` makes first.
+  Future<int> deleteContainerIfOnlyClosedTabs(
+    String id, {
+    required Set<String> closedTabIds,
+  }) async {
+    final deleted =
+        await (db.container.delete()..where(
+              (container) =>
+                  container.id.equals(id) &
+                  notExistsQuery(
+                    db.tab.select()..where(
+                      (tab) =>
+                          tab.containerId.equals(id) &
+                          (tab.isLocked.equals(true) |
+                              tab.id.isNotIn(closedTabIds)),
+                    ),
+                  ),
+            ))
+            .go();
+    if (deleted > 0) {
+      // A row kept for an undo would come back pointing at the deleted
+      // container, and the foreign key would fail the whole sync it is
+      // written in. An undone tab of it comes back under no container.
+      _undoHistory.removeWhere((_, tab) => tab.containerId == id);
+    }
+    return deleted;
   }
 
   Selectable<MapEntry<String, DateTime>> getTabTimestamps() {
@@ -1977,7 +2120,9 @@ class TabDao extends DatabaseAccessor<TabDatabase> with $TabDaoMixin {
       ..where(
         db.tab.containerId.isNull() &
             db.tab.timestamp.isSmallerThanValue(threshold) &
-            db.tab.tabMode.equalsValue(TabModeDbValue.regular),
+            db.tab.tabMode.equalsValue(TabModeDbValue.regular) &
+            // The automatic cleanup keeps locked tabs.
+            db.tab.isLocked.equals(false),
       );
 
     return query.map((row) => row.read(db.tab.id)!).get();

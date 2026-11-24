@@ -41,3 +41,19 @@ String formatMegabytes(AppLocalizations l10n, double megabytes) =>
 /// A duration in milliseconds, e.g. "300 ms".
 String formatMilliseconds(AppLocalizations l10n, int milliseconds) =>
     l10n.units_milliseconds(NumberFormat.decimalPattern().format(milliseconds));
+
+/// A length in logical pixels, rounded to whole ones, e.g. "64 px".
+String formatPixels(AppLocalizations l10n, double pixels) =>
+    l10n.units_pixels(NumberFormat.decimalPattern().format(pixels.round()));
+
+/// A [fraction] as a percentage the way the UI language writes it, e.g.
+/// "150%" or "150 %": from `Intl.defaultLocale`, which `resolveAppLocale`
+/// sets to the UI language.
+String formatPercent(double fraction) =>
+    NumberFormat.percentPattern().format(fraction);
+
+/// A duration given in [minutes], in whole hours when it is one, e.g.
+/// "30 minutes" or "4 hours".
+String formatMinutes(AppLocalizations l10n, int minutes) => minutes % 60 == 0
+    ? l10n.units_hours(minutes ~/ 60)
+    : l10n.units_minutes(minutes);

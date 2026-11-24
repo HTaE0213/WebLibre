@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:fast_equatable/fast_equatable.dart';
 import 'package:flutter/material.dart';
@@ -37,9 +38,11 @@ import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/features/settings/presentation/controllers/save_settings.dart';
 import 'package:weblibre/features/settings/presentation/widgets/relative_distance_slider_tile.dart';
 import 'package:weblibre/features/settings/presentation/widgets/settings_detail.dart';
+import 'package:weblibre/features/settings/presentation/widgets/stops_slider_tile.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/utils/units_l10n.dart';
 import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 
 List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
@@ -106,6 +109,33 @@ List<SettingsSectionDefinition> browsingSettingsSections(BuildContext context) {
           keywords: settingsKeywords(l10n.settings_onDeviceAiKeywords),
           hiddenSettings: const [HiddenSetting.localAi],
           child: const _OnDeviceAiTile(),
+        ),
+      ],
+    ),
+    SettingsSectionDefinition(
+      title: l10n.settings_sleepingTabsSectionTitle,
+      feature: FeatureId.tabsSleep,
+      entries: [
+        SettingsEntryDefinition(
+          title: l10n.settings_autoSleepTabsTitle,
+          subtitle: l10n.settings_autoSleepTabsSubtitle,
+          keywords: settingsKeywords(l10n.settings_autoSleepTabsKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _AutoSleepTabsTile(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_autoSleepIdleTitle,
+          subtitle: l10n.settings_autoSleepIdleSubtitle,
+          keywords: settingsKeywords(l10n.settings_autoSleepIdleKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _AutoSleepIdleSection(),
+        ),
+        SettingsEntryDefinition(
+          title: l10n.settings_residentTabLimitTitle,
+          subtitle: l10n.settings_residentTabLimitSubtitle,
+          keywords: settingsKeywords(l10n.settings_residentTabLimitKeywords),
+          hiddenSettings: const [HiddenSetting.autoSleepTabs],
+          child: const _ResidentTabLimitSection(),
         ),
       ],
     ),
@@ -826,6 +856,149 @@ class _CreateChildTabsTile extends HookConsumerWidget {
             .save(
               (currentSettings) =>
                   currentSettings.copyWith.createChildTabsOption(value),
+            );
+      },
+    );
+  }
+}
+
+/// Automatic tab sleep (5.9 of the tab lock and freeze plan); off on every
+/// preset (D12).
+class _AutoSleepTabsTile extends HookConsumerWidget {
+  const _AutoSleepTabsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final autoSleepTabs = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    return SwitchListTile.adaptive(
+      title: Text(l10n.settings_autoSleepTabsTitle),
+      subtitle: Text(l10n.settings_autoSleepTabsSubtitle),
+      secondary: const Icon(MdiIcons.sleep),
+      value: autoSleepTabs,
+      onChanged: (value) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.autoSleepTabs(value),
+            );
+      },
+    );
+  }
+}
+
+/// The idle time stops, in minutes: by minutes at the short end, by hours at
+/// the long end. They include every choice of D12 (10 min, 30 min, 1 h,
+/// 4 h), so a stored choice keeps its place on the slider.
+const _autoSleepIdleStops = [
+  1,
+  2,
+  3,
+  5,
+  10,
+  15,
+  20,
+  30,
+  45,
+  60,
+  120,
+  180,
+  240,
+  360,
+  480,
+  720,
+  1440,
+];
+
+class _AutoSleepIdleSection extends HookConsumerWidget {
+  const _AutoSleepIdleSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final idleMinutes = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepIdleMinutes),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    // Native sleeps a tab after at least a minute (TabSleepPolicies), so a
+    // stored 0 or less is shown as the minute it applies as.
+    final (:stops, :value) = stopsWithValue(
+      _autoSleepIdleStops,
+      math.max(1, idleMinutes),
+    );
+
+    return StopsSliderTile<int>(
+      title: l10n.settings_autoSleepIdleTitle,
+      subtitle: l10n.settings_autoSleepIdleSubtitle,
+      icon: MdiIcons.timerSandComplete,
+      enabled: enabled,
+      stops: stops,
+      value: value,
+      labelFor: (minutes) => formatMinutes(l10n, minutes),
+      onChanged: (minutes) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.autoSleepIdleMinutes(minutes),
+            );
+      },
+    );
+  }
+}
+
+/// The resident limit stops: every count from 1 to 20, then no limit (null)
+/// at the end of the track. They include every choice of D12 (4, 6, 10, 20).
+final _residentTabLimitCountStops = [
+  for (var limit = 1; limit <= 20; limit++) limit,
+];
+
+class _ResidentTabLimitSection extends HookConsumerWidget {
+  const _ResidentTabLimitSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final enabled = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.autoSleepTabs),
+    );
+    final residentTabLimit = ref.watch(
+      storedGeneralSettingsProvider.select((s) => s.residentTabLimit),
+    );
+    final l10n = AppLocalizations.of(context);
+
+    // Native applies a limit of 0 or less as no limit (TabSleepPolicies).
+    final limit = residentTabLimit != null && residentTabLimit > 0
+        ? residentTabLimit
+        : null;
+    final counts = limit == null
+        ? (stops: _residentTabLimitCountStops, value: null)
+        : stopsWithValue(_residentTabLimitCountStops, limit);
+
+    return StopsSliderTile<int?>(
+      title: l10n.settings_residentTabLimitTitle,
+      subtitle: l10n.settings_residentTabLimitSubtitle,
+      subtitleFor: (limit) =>
+          limit == 1 ? l10n.settings_residentTabLimitOneSubtitle : null,
+      icon: MdiIcons.tabUnselected,
+      enabled: enabled,
+      stops: [...counts.stops, null],
+      value: counts.value,
+      labelFor: (limit) => limit == null
+          ? l10n.settings_residentTabLimitOff
+          : l10n.settings_residentTabLimitCount(limit),
+      onChanged: (limit) async {
+        await ref
+            .read(saveGeneralSettingsControllerProvider.notifier)
+            .save(
+              (currentSettings) =>
+                  currentSettings.copyWith.residentTabLimit(limit),
             );
       },
     );

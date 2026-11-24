@@ -69,7 +69,7 @@ final class KeptWhenHoldsProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$keptWhenHoldsHash() => r'68af8e79a3737c6bb66b13beac72622c7843d90b';
+String _$keptWhenHoldsHash() => r'79954f7f127ab8e84a50a76280f532faf8502adc';
 
 /// Whether [kept] holds now.
 

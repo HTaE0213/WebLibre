@@ -14,6 +14,8 @@ import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import eu.weblibre.flutter_mozilla_components.components.StaleUploads
 import eu.weblibre.flutter_mozilla_components.history.HistoryExclusions
+import eu.weblibre.flutter_mozilla_components.tabs.TabCloseProtection
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import eu.weblibre.flutter_mozilla_components.pigeons.AddonCollection
 import eu.weblibre.flutter_mozilla_components.pigeons.BrowserExtensionEvents
 import eu.weblibre.flutter_mozilla_components.pigeons.BounceTrackingProtectionMode
@@ -52,9 +54,11 @@ import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import mozilla.components.browser.storage.sync.GlobalPlacesDependencyProvider
 import mozilla.components.browser.session.storage.AutoSave
 import mozilla.components.browser.state.action.RestoreCompleteAction
@@ -83,6 +87,7 @@ private const val HISTORY_METADATA_MAX_AGE_IN_MS = 14L * 24 * 60 * 60 * 1000 // 
 private const val DEFAULT_QUERY_PARAMETER_STRIPPING_STRIP_LIST =
     "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc _kx _openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer guce_referrer_sig hsCtaTracking igshid irclickid mc_eid mkt_tok ml_subscriber ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer sc_eh sc_uid sms_click sms_source sms_uph srsltid ss_email_id syclid ttclid twclid unicorn_click_id vero_conv vero_id vgo_ee wbraid wickedid yclid ymclid ysclid"
 private const val UBLOCK_FILTER_LISTS_PREF = "browser.weblibre.uBO.filterLists"
+private const val REPLACEMENT_PUSH_POLL_MS = 100L
 
 object GlobalComponents {
     private var _components: Components? = null
@@ -152,6 +157,31 @@ object GlobalComponents {
     }
 
     /**
+     * The Push that replaced [closed] for [context]'s profile, once it is
+     * initialized; null when none is within [timeoutMillis].
+     *
+     * A UI start in a process that a push started headless rebuilds the
+     * external set into a full one, closing the external Push mid-delivery
+     * perhaps. The full set's Push is assigned and initialized on the main
+     * thread, where it is looked for here.
+     */
+    suspend fun awaitReplacementPush(context: Context, closed: Push, timeoutMillis: Long): Push? {
+        val current: suspend () -> Push? = {
+            withContext(Dispatchers.Main.immediate) {
+                pushForProfile(context)?.takeIf { it !== closed && it.isInitialized }
+            }
+        }
+        return withTimeoutOrNull(timeoutMillis) {
+            var replacement = current()
+            while (replacement == null) {
+                delay(REPLACEMENT_PUSH_POLL_MS)
+                replacement = current()
+            }
+            replacement
+        }
+    }
+
+    /**
      * The committed process context, or `null` while the process is undecided.
      *
      * Does not read `current_profile`: once the process has committed, that file is
@@ -175,6 +205,7 @@ object GlobalComponents {
         // from the same process-global counter as the next profile's, so Dart's
         // recency gate would not reject them.
         _components?.existingCore?.flutterEventMiddleware?.close()
+        _components?.existingCore?.retireLifecycle()
         _components = null
         currentMode = null
         customTabsInHandover = null
@@ -559,6 +590,10 @@ object GlobalComponents {
             previousComponents?.core?.store?.state?.customTabs.orEmpty()
 
         previousComponents?.existingPush?.close()
+        // The outgoing Core is replaced, never torn down (F33): its lifecycle
+        // work stops here, before the new one can act on the same tabs.
+        previousComponents?.existingCore?.retireLifecycle()
+        TabLifecycleRegistry.attach(applicationContext.rootApplicationContext)
 
         // Restore this profile's last routing before the engine — and with it the
         // proxy extension — exists. This runs on every setup, including a rebuild:
@@ -799,6 +834,10 @@ object GlobalComponents {
         val messenger = NoopBinaryMessenger()
 
         HistoryExclusions.loadPersisted(baseContext.applicationContext)
+        // A headless start has no plugin to attach the tab locks; the store's
+        // guard enforces them all the same.
+        TabCloseProtection.attach(baseContext.applicationContext)
+        TabLifecycleRegistry.attach(baseContext.applicationContext)
         historyEvents = null
 
         val selectionActionEvents = GeckoSelectionActionEvents(messenger)

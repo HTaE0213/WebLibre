@@ -4,6 +4,7 @@
 
 package eu.weblibre.flutter_mozilla_components.push
 
+import eu.weblibre.flutter_mozilla_components.lifecycle.TabLifecycleRegistry
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -15,7 +16,9 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import eu.weblibre.flutter_mozilla_components.ActiveProfile
 import eu.weblibre.flutter_mozilla_components.GlobalComponents
+import eu.weblibre.flutter_mozilla_components.rootApplicationContext
 import eu.weblibre.flutter_mozilla_components.startup.StartupArbiter
+import eu.weblibre.flutter_mozilla_components.startup.StartupPaths
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -86,18 +89,28 @@ class PushMessageWorker(
         // answered differently in between, and the commitment is what is binding.
         if (activeProfile.relativePath != queuedProfile) return Result.success()
 
+        // Before the queue is read: an older build may have decrypted another
+        // profile's message into it, through a transport a clone shared, and the
+        // one-time migration deletes such a queue. Outside the profile lock, so
+        // the wait holds nothing up.
+        val transportOpen = withContext(Dispatchers.IO) {
+            PushTransportMigration.awaitOpen(
+                StartupPaths(applicationContext.rootApplicationContext),
+                TRANSPORT_TIMEOUT_MS,
+            )
+        }
+        if (!transportOpen) return Result.retry()
+
         return ActiveProfile.withProfileLock profile@{
 
             val existing = GlobalComponents.components
             if (existing != null && existing.profileApplicationContext.relativePath != queuedProfile) {
                 return@profile Result.success()
             }
-            val initialized = existing != null || withContext(Dispatchers.Main.immediate) {
-                GlobalComponents.ensureExternalComponents(applicationContext)
-            }
-            if (!initialized) return@profile Result.retry()
 
-            val push = GlobalComponents.pushForProfile(activeProfile) ?: return@profile Result.retry()
+            // Read before anything starts Gecko: a message for a frozen
+            // container's context is consumed here (5.8, F27), so no
+            // components, no runtime and no retry come of it.
             val store = PushMessageStore(activeProfile)
             val message = try {
                 store.get(messageId)
@@ -109,8 +122,39 @@ class PushMessageWorker(
                 return@profile Result.failure()
             } ?: return@profile Result.success()
 
+            TabLifecycleRegistry.attach(applicationContext)
+            when (PushContextGate.consumeIfRestricted(message.scope) { store.complete(message.id) }) {
+                null -> {
+                    Log.e(TAG, "Unable to mark skipped push message ${message.id} complete")
+                    return@profile Result.retry()
+                }
+                true -> {
+                    Log.i(TAG, "Skipped push message ${message.id}: its context is frozen")
+                    return@profile Result.success()
+                }
+                false -> Unit
+            }
+
+            val initialized = existing != null || withContext(Dispatchers.Main.immediate) {
+                GlobalComponents.ensureExternalComponents(applicationContext)
+            }
+            if (!initialized) return@profile Result.retry()
+
+            val push = GlobalComponents.pushForProfile(activeProfile) ?: return@profile Result.retry()
+
             try {
-                push.deliverMessage(message.scope, message.payload)
+                // A UI start rebuilds the set this worker started headless and
+                // closes its Push, possibly while the delivery warms up its
+                // session: the replacement takes the message at once rather
+                // than after WorkManager's ten-second backoff.
+                deliverSurvivingRebuild(
+                    push = push,
+                    replacementOf = { closed ->
+                        GlobalComponents.awaitReplacementPush(activeProfile, closed, REPLACEMENT_TIMEOUT_MS)
+                            ?.also { Log.i(TAG, "Delivering ${message.id} through the rebuilt components' push") }
+                    },
+                    deliver = { it.deliverMessage(message.scope, message.payload) },
+                )
                 if (!store.complete(message.id)) {
                     Log.e(TAG, "Unable to mark delivered push message ${message.id} complete")
                     return@profile Result.retry()
@@ -134,5 +178,26 @@ class PushMessageWorker(
         const val KEY_MESSAGE_ID = "messageId"
         private const val FOREGROUND_CHANNEL_ID = "weblibre_push_delivery"
         private const val TAG = "PushMessageWorker"
+        private const val TRANSPORT_TIMEOUT_MS = 30000L
+
+        /** How long a delivery whose Push closed waits for the rebuilt set's. */
+        private const val REPLACEMENT_TIMEOUT_MS = 5000L
+
+        /**
+         * Delivers through [push] or, when it was closed first, once through
+         * the instance [replacementOf] finds; rethrows [Push.ClosedException]
+         * when there is none, so the work is retried. Anything else fails as is.
+         */
+        internal suspend fun <P : Any> deliverSurvivingRebuild(
+            push: P,
+            replacementOf: suspend (closed: P) -> P?,
+            deliver: suspend (P) -> Unit,
+        ) {
+            try {
+                deliver(push)
+            } catch (closed: Push.ClosedException) {
+                deliver(replacementOf(push) ?: throw closed)
+            }
+        }
     }
 }
