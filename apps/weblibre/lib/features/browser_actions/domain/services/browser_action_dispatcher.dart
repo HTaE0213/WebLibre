@@ -426,8 +426,8 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
         if (homeUrl != null) {
           if (tabId != null) {
-            // The Home button behaves like a normal homepage navigation:
-            // replace the current page instead of creating another tab.
+            // Reveal the tab even when the internal home surface was forced.
+            ref.read(forceBrowserHomeProvider.notifier).clear();
             await ref
                 .read(tabSessionProvider(tabId: tabId).notifier)
                 .loadUrl(url: homeUrl);
@@ -1144,6 +1144,8 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
                 ? const TabContainerSelection.useSelected()
                 : TabContainerSelection.openedFrom(tabId),
             childPlacement: ChildTabPlacement.afterParent,
+            // This is a browser-owned URL, not a link from the opener.
+            parentIsReferrer: false,
           );
       return;
     }
