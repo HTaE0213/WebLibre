@@ -49,8 +49,12 @@ void main() {
         home: Scaffold(
           body: Center(
             child: ToolbarButtonGestureSurface(
-              onSwipeUp: () async => upCount++,
-              onSwipeDown: () async => downCount++,
+              onSwipeUp: () async {
+                upCount++;
+              },
+              onSwipeDown: () async {
+                downCount++;
+              },
               child: const SizedBox(
                 key: ValueKey('gesture-target'),
                 width: 80,
@@ -72,7 +76,6 @@ void main() {
     expect(upCount, 0);
     expect(downCount, 1);
   });
-
 
   testWidgets('a long press still reaches the child', (tester) async {
     var longPressCount = 0;
