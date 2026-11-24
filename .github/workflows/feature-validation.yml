@@ -49,11 +49,9 @@ jobs:
       - name: Check localization template
         run: python3 scripts/merge_l10n_arb.py --check
 
-      - name: Show formatting changes (until branch is clean)
-        continue-on-error: true
+      - name: Verify Dart formatting
         run: |
-          set -euo pipefail
-          dart format \
+          dart format --output=none --set-exit-if-changed \
             apps/weblibre/lib/features/addons/presentation/screens/addon_details.dart \
             apps/weblibre/lib/features/addons/presentation/widgets/pinned_addon_bar.dart \
             apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart \
@@ -62,11 +60,6 @@ jobs:
             apps/weblibre/lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
             apps/weblibre/lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             apps/weblibre/test/features/geckoview/features/contextual_toolbar
-
-          printf '\n=== FORMAT DIFF START ===\n'
-          git diff -- apps/weblibre/lib apps/weblibre/test
-          printf '\n=== FORMAT DIFF END ===\n'
-          git diff --exit-code -- apps/weblibre/lib apps/weblibre/test
 
       - name: Analyze changed Flutter feature code
         working-directory: apps/weblibre

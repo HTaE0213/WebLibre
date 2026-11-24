@@ -107,10 +107,11 @@ jobs:
           test "$(git -C "$RUNNER_TEMP/IPtProxy" rev-parse HEAD)" = "$IPTPROXY_COMMIT"
           git -C "$RUNNER_TEMP/IPtProxy" submodule update --init dnstt
 
-      - name: Build native gomobile runtime
+      - name: Build native gomobile runtime (ARM64 only)
         env:
           SING_BOX_SOURCE: ${{ runner.temp }}/sing-box
           IPTPROXY_SOURCE: ${{ runner.temp }}/IPtProxy
+          TARGET: android/arm64
         run: melos run build-go-runtime --no-select
 
       - name: Give preview an independent Android app identity
