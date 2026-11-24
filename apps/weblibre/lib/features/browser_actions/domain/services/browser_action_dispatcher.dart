@@ -20,9 +20,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
