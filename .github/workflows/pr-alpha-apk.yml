@@ -65,7 +65,7 @@ jobs:
         run: |
           set -euo pipefail
           ANDROID_NDK_VERSION="$(
-            sed -n 's/^weblibre\\.ndkVersion[[:space:]]*=[[:space:]]*//p' \
+            awk -F= '$1 == "weblibre.ndkVersion" { print $2 }' \
               apps/weblibre/android/gradle.properties
           )"
           test -n "$ANDROID_NDK_VERSION"
