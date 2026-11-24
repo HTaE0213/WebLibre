@@ -41,11 +41,14 @@ import 'package:weblibre/features/geckoview/features/browser/domain/entities/she
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_gesture_actions.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_bar_buttons.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/contextual_toolbar.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/quick_switcher_button_row.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_surface.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/browser_bar_tint.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/layout/browser_chrome_layout.dart';
@@ -601,7 +604,28 @@ class BrowserTabBar extends HookConsumerWidget {
     final hasPinnedAddons = ref.watch(
       pinnedAddonIdsProvider.select((ids) => ids.isNotEmpty),
     );
+    final gestureBindings = ref.watch(toolbarButtonGestureBindingsProvider);
+
     final isVertical = position.isVertical;
+
+    Widget wrapMainToolbarButton(String buttonId, Widget child) {
+      final bindings =
+          gestureBindings[toolbarButtonGestureTargetId(buttonId)] ?? const {};
+      final swipeUp = bindings[ToolbarButtonGestureDirection.swipeUp.name];
+      final swipeDown = bindings[ToolbarButtonGestureDirection.swipeDown.name];
+
+      return ToolbarButtonGestureSurface(
+        enabled: !isVertical,
+        onSwipeUp: swipeUp == null
+            ? null
+            : () => runToolbarButtonGestureAction(ref, swipeUp),
+        onSwipeDown: swipeDown == null
+            ? null
+            : () => runToolbarButtonGestureAction(ref, swipeDown),
+        child: child,
+      );
+    }
+
     // Only a vertical rail has a width to be wide; the horizontal bars leave
     // railWidth at its compact default and never take these branches.
     final wideRail = isVertical && isWideRail;
@@ -650,26 +674,35 @@ class BrowserTabBar extends HookConsumerWidget {
       if (!wideRail || hasPinnedAddons)
         PinnedAddonBar(axis: wideRail ? Axis.horizontal : switcherAxis),
       if (isSmallWebMode)
-        ReaderButton(
-          buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
-            onTap: isLoading
-                ? null
-                : () async {
-                    await ref
-                        .read(readerableScreenControllerProvider.notifier)
-                        .toggleReaderView(!readerActive);
-                  },
-            child: icon,
+        wrapMainToolbarButton(
+          ToolbarButtonId.readerMode.name,
+          ReaderButton(
+            buttonBuilder: (isLoading, readerActive, icon) => ToolbarButton(
+              onTap: isLoading
+                  ? null
+                  : () async {
+                      await ref
+                          .read(readerableScreenControllerProvider.notifier)
+                          .toggleReaderView(!readerActive);
+                    },
+              child: icon,
+            ),
           ),
         ),
       if (showMainToolbarTabsCount)
-        TabsCountButton(
-          selectedTabId: selectedTabId,
-          displayedSheet: displayedSheet,
-          showLongPressMenu: true,
+        wrapMainToolbarButton(
+          ToolbarButtonId.tabsCount.name,
+          TabsCountButton(
+            selectedTabId: selectedTabId,
+            displayedSheet: displayedSheet,
+            showLongPressMenu: true,
+          ),
         ),
       if (showMainToolbarNavigationButton)
-        NavigationMenuButton(selectedTabId: selectedTabId),
+        wrapMainToolbarButton(
+          ToolbarButtonId.navigationMenu.name,
+          NavigationMenuButton(selectedTabId: selectedTabId),
+        ),
     ];
 
     return BrowserTabBarView(

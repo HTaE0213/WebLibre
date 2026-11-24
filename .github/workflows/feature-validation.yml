@@ -1,0 +1,82 @@
+name: Feature validation
+
+# PR-only checks for browser feature changes. Never releases or signs with
+# production credentials. The v* release workflow stays separate.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/feature-validation.yml'
+      - '.github/workflows/actions.lock'
+      - 'apps/weblibre/lib/**'
+      - 'apps/weblibre/test/**'
+      - 'apps/weblibre/pubspec.yaml'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - 'packages/**'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: feature-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter-checks:
+    name: Flutter gesture checks
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: subosito/flutter-action@v2.23.0
+        with:
+          channel: stable
+          flutter-version: 3.47.8
+          cache: false
+
+      - name: Resolve workspace dependencies
+        run: |
+          set -euo pipefail
+          dart pub global activate melos 7.8.1
+          melos bootstrap
+
+      - name: Check localization template
+        run: python3 scripts/merge_l10n_arb.py --check
+
+      - name: Verify Dart formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            apps/weblibre/lib/features/addons/presentation/screens/addon_details.dart \
+            apps/weblibre/lib/features/addons/presentation/widgets/pinned_addon_bar.dart \
+            apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart \
+            apps/weblibre/lib/features/geckoview/domain/repositories/tab.dart \
+            apps/weblibre/lib/features/geckoview/features/browser/features/contextual_toolbar \
+            apps/weblibre/lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
+            apps/weblibre/lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
+            apps/weblibre/test/features/geckoview/features/contextual_toolbar
+
+      - name: Analyze changed Flutter feature code
+        working-directory: apps/weblibre
+        run: |
+          flutter analyze --no-pub \
+            lib/features/addons/presentation/screens/addon_details.dart \
+            lib/features/addons/presentation/widgets/pinned_addon_bar.dart \
+            lib/features/browser_actions/domain/services/browser_action_dispatcher.dart \
+            lib/features/geckoview/domain/repositories/tab.dart \
+            lib/features/geckoview/features/browser/features/contextual_toolbar \
+            lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
+            lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
+            test/features/geckoview/features/contextual_toolbar
+
+      - name: Run gesture unit/widget tests
+        working-directory: apps/weblibre
+        run: |
+          flutter test --no-pub \
+            test/features/geckoview/features/contextual_toolbar/toolbar_button_gesture_bindings_test.dart \
+            test/features/geckoview/features/contextual_toolbar/toolbar_button_gesture_surface_test.dart

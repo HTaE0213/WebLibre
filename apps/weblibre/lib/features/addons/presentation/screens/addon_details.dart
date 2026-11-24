@@ -24,12 +24,17 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/domain/feature_policy/feature_policy.dart';
 import 'package:weblibre/features/addons/domain/providers.dart';
 import 'package:weblibre/features/addons/extensions/addon_info.dart';
 import 'package:weblibre/features/addons/presentation/screens/addon_internal_settings.dart';
 import 'package:weblibre/features/addons/presentation/widgets/addon_ui.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/services/browser_addon.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_settings_editor.dart';
+import 'package:weblibre/features/settings/domain/hidden_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
+import 'package:weblibre/presentation/widgets/hidden_feature_gate.dart';
 import 'package:weblibre/presentation/widgets/uri_breadcrumb.dart';
 import 'package:weblibre/utils/number_format.dart';
 import 'package:weblibre/utils/ui_helper.dart';
@@ -254,6 +259,9 @@ class _ManagementSection extends ConsumerWidget {
     final isPinned = ref.watch(
       pinnedAddonIdsProvider.select((ids) => ids.contains(addonId)),
     );
+    final gestureBindings = ref.watch(toolbarButtonGestureBindingsProvider);
+    final hasSwipeBindings =
+        gestureBindings[addonGestureTargetId(addonId)]?.isNotEmpty ?? false;
     final addon = addonAsync.value;
 
     if (addon == null) return const SizedBox.shrink();
@@ -335,6 +343,18 @@ class _ManagementSection extends ConsumerWidget {
                       .setPinned(addonId, pinned: pinned);
                 },
               ),
+              if (isPinned)
+                HiddenFeatureGate.feature(
+                  FeatureId.layoutContextualToolbarAdvanced,
+                  hiddenSettings: hasSwipeBindings
+                      ? const [HiddenSetting.toolbarButtons]
+                      : const [],
+                  child: ToolbarButtonGestureSettingsEditor(
+                    targetId: addonGestureTargetId(addonId),
+                    showHeading: true,
+                    dense: true,
+                  ),
+                ),
               if (addon.hasOptionsPage)
                 ListTile(
                   leading: const Icon(Icons.settings_outlined),
