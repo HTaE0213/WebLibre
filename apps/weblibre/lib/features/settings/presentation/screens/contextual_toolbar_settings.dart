@@ -464,12 +464,14 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                         HiddenFeatureGate.feature(
                           FeatureId.layoutContextualToolbarAdvanced,
                           hiddenSettings:
-                              (ref.watch(toolbarButtonGestureBindingsProvider)[
-                                            toolbarButtonGestureTargetId(
-                                              config.buttonId,
-                                            )
-                                          ]?.isNotEmpty ??
-                                          false)
+                              (ref
+                                      .watch(
+                                        toolbarButtonGestureBindingsProvider,
+                                      )[toolbarButtonGestureTargetId(
+                                        config.buttonId,
+                                      )]
+                                      ?.isNotEmpty ??
+                                  false)
                               ? const [HiddenSetting.toolbarButtons]
                               : const [],
                           child: ToolbarButtonGestureSettingsEditor(

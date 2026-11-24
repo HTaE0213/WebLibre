@@ -7,10 +7,7 @@ void main() {
     test('round-trips a browser action by its stable enum name', () {
       const action = ToolbarButtonGestureAction.browser(BrowserAction.back);
 
-      expect(
-        ToolbarButtonGestureAction.fromJson(action.toJson()),
-        action,
-      );
+      expect(ToolbarButtonGestureAction.fromJson(action.toJson()), action);
     });
 
     test('round-trips an extension shortcut by extension ID', () {
@@ -18,21 +15,21 @@ void main() {
         extensionId: 'test-extension@example.com',
       );
 
-      expect(
-        ToolbarButtonGestureAction.fromJson(action.toJson()),
-        action,
-      );
+      expect(ToolbarButtonGestureAction.fromJson(action.toJson()), action);
     });
 
-    test('drops unknown browser actions instead of binding the wrong action', () {
-      expect(
-        ToolbarButtonGestureAction.fromJson({
-          'type': 'browser',
-          'action': 'removedAction',
-        }),
-        isNull,
-      );
-    });
+    test(
+      'drops unknown browser actions instead of binding the wrong action',
+      () {
+        expect(
+          ToolbarButtonGestureAction.fromJson({
+            'type': 'browser',
+            'action': 'removedAction',
+          }),
+          isNull,
+        );
+      },
+    );
 
     test('drops malformed extension bindings', () {
       expect(

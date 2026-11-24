@@ -74,8 +74,7 @@ Widget buildResolvedToolbarButton(
   final bindings = ref.watch(toolbarButtonGestureBindingsProvider);
   final buttonBindings =
       bindings[toolbarButtonGestureTargetId(button.buttonId)] ?? const {};
-  final swipeUp =
-      buttonBindings[ToolbarButtonGestureDirection.swipeUp.name];
+  final swipeUp = buttonBindings[ToolbarButtonGestureDirection.swipeUp.name];
   final swipeDown =
       buttonBindings[ToolbarButtonGestureDirection.swipeDown.name];
 

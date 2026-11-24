@@ -34,9 +34,7 @@ Future<void> runToolbarButtonGestureAction(
 ) async {
   final browserAction = action.browserAction;
   if (browserAction != null) {
-    await ref
-        .read(browserActionDispatcherProvider.notifier)
-        .run(browserAction);
+    await ref.read(browserActionDispatcherProvider.notifier).run(browserAction);
     return;
   }
 
@@ -45,7 +43,9 @@ Future<void> runToolbarButtonGestureAction(
 
   final actionType =
       action.extensionActionType ?? WebExtensionActionType.browser;
-  final extension = ref.read(webExtensionsStateProvider(actionType))[extensionId];
+  final extension = ref.read(
+    webExtensionsStateProvider(actionType),
+  )[extensionId];
   if (extension?.enabled != true) return;
 
   await ref

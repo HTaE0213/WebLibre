@@ -20,9 +20,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_mozilla_components/flutter_mozilla_components.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:weblibre/core/logger.dart';
 import 'package:weblibre/core/providers/router.dart';
@@ -39,8 +39,8 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
-import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
@@ -434,9 +434,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           } else {
             // With no selected tab, let the home-target controller create the
             // configured page using its normal startup/container handling.
-            await ref
-                .read(homeTargetControllerProvider.notifier)
-                .applyTarget();
+            await ref.read(homeTargetControllerProvider.notifier).applyTarget();
           }
         } else {
           ref.read(forceBrowserHomeProvider.notifier).request();

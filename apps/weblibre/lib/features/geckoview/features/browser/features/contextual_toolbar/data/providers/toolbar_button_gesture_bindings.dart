@@ -45,10 +45,9 @@ class ToolbarButtonGestureAction {
       extensionActionType = null;
 
   const ToolbarButtonGestureAction.extension({
-    required String extensionId,
+    required this.extensionId,
     WebExtensionActionType actionType = WebExtensionActionType.browser,
   }) : browserAction = null,
-       extensionId = extensionId,
        extensionActionType = actionType;
 
   bool get isBrowserAction => browserAction != null;
@@ -63,7 +62,8 @@ class ToolbarButtonGestureAction {
     return {
       'type': 'extension',
       'extensionId': extensionId,
-      'actionType': extensionActionType?.name ?? WebExtensionActionType.browser.name,
+      'actionType':
+          extensionActionType?.name ?? WebExtensionActionType.browser.name,
     };
   }
 

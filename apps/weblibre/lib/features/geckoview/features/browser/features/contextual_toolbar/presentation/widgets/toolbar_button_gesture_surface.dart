@@ -21,6 +21,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 /// Adds up/down swipe triggers without replacing the child's tap or long press.
@@ -54,6 +55,8 @@ class _ToolbarButtonGestureSurfaceState
     extends State<ToolbarButtonGestureSurface> {
   static const _minimumDistance = 28.0;
   static const _minimumVelocity = 420.0;
+  static const _swipeUpSemantics = CustomSemanticsAction(label: 'Swipe up');
+  static const _swipeDownSemantics = CustomSemanticsAction(label: 'Swipe down');
 
   double _dragDistance = 0;
 
@@ -72,13 +75,13 @@ class _ToolbarButtonGestureSurfaceState
 
     final customActions = <CustomSemanticsAction, VoidCallback>{
       if (onSwipeUp != null)
-        CustomSemanticsAction(label: 'Swipe up'): () => _invoke(onSwipeUp),
+        _swipeUpSemantics: () => _invoke(onSwipeUp),
       if (onSwipeDown != null)
-        CustomSemanticsAction(label: 'Swipe down'): () => _invoke(onSwipeDown),
+        _swipeDownSemantics: () => _invoke(onSwipeDown),
     };
 
     return Semantics(
-      customActions: customActions,
+      customSemanticsActions: customActions,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onVerticalDragStart: (_) => _dragDistance = 0,

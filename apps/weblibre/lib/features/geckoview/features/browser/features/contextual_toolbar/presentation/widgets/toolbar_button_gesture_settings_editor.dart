@@ -108,9 +108,9 @@ class _SwipeActionTile extends ConsumerWidget {
     if (extensionId != null) {
       final actionType =
           action?.extensionActionType ?? WebExtensionActionType.browser;
-      final extension = ref.watch(webExtensionsStateProvider(actionType))[
-        extensionId
-      ];
+      final extension = ref.watch(
+        webExtensionsStateProvider(actionType),
+      )[extensionId];
       return extension?.title ?? extensionId;
     }
 
@@ -165,10 +165,8 @@ showToolbarButtonGestureActionPicker(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (context) => _ToolbarButtonGestureActionPicker(
-      selected: selected,
-      title: title,
-    ),
+    builder: (context) =>
+        _ToolbarButtonGestureActionPicker(selected: selected, title: title),
   );
 }
 
@@ -230,23 +228,25 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
       webExtensionsStateProvider(WebExtensionActionType.browser),
     );
     final selectedExtensionId = selected?.extensionId;
-    final extensions = extensionStates.values
-        .where(
-          (extension) =>
-              extension.enabled || extension.extensionId == selectedExtensionId,
-        )
-        .where(
-          (extension) => matches([
-            extension.title ?? extension.extensionId,
-            extension.extensionId,
-          ]),
-        )
-        .toList()
-      ..sort(
-        (a, b) => (a.title ?? a.extensionId).toLowerCase().compareTo(
-          (b.title ?? b.extensionId).toLowerCase(),
-        ),
-      );
+    final extensions =
+        extensionStates.values
+            .where(
+              (extension) =>
+                  extension.enabled ||
+                  extension.extensionId == selectedExtensionId,
+            )
+            .where(
+              (extension) => matches([
+                extension.title ?? extension.extensionId,
+                extension.extensionId,
+              ]),
+            )
+            .toList()
+          ..sort(
+            (a, b) => (a.title ?? a.extensionId).toLowerCase().compareTo(
+              (b.title ?? b.extensionId).toLowerCase(),
+            ),
+          );
 
     final showStaleExtension =
         selectedExtensionId != null &&
@@ -302,8 +302,7 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                         trailing: selected == null
                             ? Icon(Icons.check, color: colorScheme.primary)
                             : null,
-                        onTap: () =>
-                            Navigator.of(context).pop((action: null)),
+                        onTap: () => Navigator.of(context).pop((action: null)),
                       ),
                     for (final category in BrowserActionCategory.values)
                       if (byCategory[category] case final actions?
@@ -348,7 +347,7 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                       if (showStaleExtension)
                         ListTile(
                           leading: const Icon(Icons.extension_outlined),
-                          title: Text(selectedExtensionId!),
+                          title: Text(selectedExtensionId),
                           subtitle: const Text('Extension is not installed'),
                           selected: true,
                           enabled: false,
