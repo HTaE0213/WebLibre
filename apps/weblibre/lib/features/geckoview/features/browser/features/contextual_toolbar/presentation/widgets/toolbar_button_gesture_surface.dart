@@ -74,10 +74,8 @@ class _ToolbarButtonGestureSurfaceState
     if (onSwipeUp == null && onSwipeDown == null) return widget.child;
 
     final customActions = <CustomSemanticsAction, VoidCallback>{
-      if (onSwipeUp != null)
-        _swipeUpSemantics: () => _invoke(onSwipeUp),
-      if (onSwipeDown != null)
-        _swipeDownSemantics: () => _invoke(onSwipeDown),
+      if (onSwipeUp != null) _swipeUpSemantics: () => _invoke(onSwipeUp),
+      if (onSwipeDown != null) _swipeDownSemantics: () => _invoke(onSwipeDown),
     };
 
     return Semantics(
