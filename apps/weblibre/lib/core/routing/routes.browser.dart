@@ -106,6 +106,10 @@ class SearchRoute extends GoRouteData with $SearchRoute {
   /// split view: a chosen open tab or a submitted URL is paired with it.
   final String? splitWithTabId;
 
+  /// The tab beside which a new result belongs when a New Tab action opened
+  /// this search route. Captured at action time, not when search is submitted.
+  final String? afterTabId;
+
   const SearchRoute({
     required this.tabType,
     this.searchText = SearchRoute.emptySearchText,
@@ -113,6 +117,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
     this.autoSubmitSearch = false,
     this.tabId,
     this.splitWithTabId,
+    this.afterTabId,
   });
 
   @override
@@ -126,6 +131,7 @@ class SearchRoute extends GoRouteData with $SearchRoute {
       autoSubmitSearch: autoSubmitSearch,
       tabId: tabId,
       splitWithTabId: splitWithTabId,
+      afterTabId: afterTabId,
     );
   }
 }
