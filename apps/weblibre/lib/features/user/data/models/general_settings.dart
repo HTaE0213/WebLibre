@@ -429,6 +429,12 @@ class GeneralSettings with FastEquatable {
   /// unparseable value falls back to the home surface.
   final String? homeTargetUrl;
 
+  /// New-tab destination, independent of the cold-start/home button target.
+  final NewTabTarget newTabTarget;
+
+  /// Only used when [newTabTarget] is [NewTabTarget.customUrl].
+  final String? newTabTargetUrl;
+
   /// Also apply [homeTarget] when the last tab in the current container is
   /// closed, instead of falling through to a tab from somewhere else.
   final bool homeTargetOnLastTabClosed;
@@ -755,6 +761,8 @@ class GeneralSettings with FastEquatable {
     required this.showSearchCloseButton,
     required this.homeTarget,
     required this.homeTargetUrl,
+    required this.newTabTarget,
+    required this.newTabTargetUrl,
     required this.homeTargetOnLastTabClosed,
     required this.homeSearchBarPlacement,
     required this.searchFieldPlacement,
@@ -863,6 +871,8 @@ class GeneralSettings with FastEquatable {
     bool? showSearchCloseButton,
     HomeTarget? homeTarget,
     this.homeTargetUrl,
+    NewTabTarget? newTabTarget,
+    this.newTabTargetUrl,
     bool? homeTargetOnLastTabClosed,
     HomeSearchBarPlacement? homeSearchBarPlacement,
     SearchFieldPlacement? searchFieldPlacement,
@@ -968,6 +978,7 @@ class GeneralSettings with FastEquatable {
        // Defaults to `home`, which is exactly what the browser did before this
        // setting existed. Anything else would change startup for every user.
        homeTarget = homeTarget ?? HomeTarget.home,
+       newTabTarget = newTabTarget ?? NewTabTarget.followHome,
        homeTargetOnLastTabClosed = homeTargetOnLastTabClosed ?? false,
        // Deliberately not a fixed edge: the placement that matches the user's
        // tab bar position is the one they can reach.
@@ -1557,6 +1568,8 @@ class GeneralSettings with FastEquatable {
     showSearchCloseButton,
     homeTarget,
     homeTargetUrl,
+    newTabTarget,
+    newTabTargetUrl,
     homeTargetOnLastTabClosed,
     homeSearchBarPlacement,
     searchFieldPlacement,
