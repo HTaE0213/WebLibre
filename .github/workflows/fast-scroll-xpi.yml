@@ -1,0 +1,61 @@
+name: Fast Scroll XPI
+
+# Standalone WebExtension: does not require the Flutter toolchain or Android keys.
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'contrib/fast-scroll/**'
+      - '.github/workflows/fast-scroll-xpi.yml'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: fast-scroll-xpi-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  package:
+    name: Verify and build unsigned XPI
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check contrib/fast-scroll/background.js
+          node --check contrib/fast-scroll/content.js
+
+      - name: Check Python packaging script
+        run: |
+          python3 -m py_compile contrib/fast-scroll/build_xpi.py
+          python3 -m py_compile contrib/fast-scroll/test_fast_scroll.py
+
+      - name: Build and validate standalone XPI
+        run: |
+          set -euo pipefail
+          python3 contrib/fast-scroll/build_xpi.py
+          python3 - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import json
+          xpi = next(Path('contrib/fast-scroll/dist').glob('*.xpi'))
+          with ZipFile(xpi) as z:
+              assert z.namelist() == ['manifest.json', 'background.js', 'content.js']
+              manifest = json.loads(z.read('manifest.json'))
+              assert manifest['browser_specific_settings']['gecko']['id'] == 'weblibre-fast-scroll@local'
+          PY
+          sha256sum contrib/fast-scroll/dist/*.xpi
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: weblibre-fast-scroll-xpi
+          path: contrib/fast-scroll/dist/*.xpi
+          retention-days: 14
+          if-no-files-found: error
