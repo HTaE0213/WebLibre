@@ -1255,10 +1255,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     final router = await ref.read(routerProvider.future);
     if (!ref.mounted) return;
 
-    final route = SearchRoute(
-      tabType: targetTabType,
-      afterTabId: tabId,
-    );
+    final route = SearchRoute(tabType: targetTabType, afterTabId: tabId);
     await router.push(route.location);
   }
 }
