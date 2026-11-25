@@ -61,6 +61,15 @@ jobs:
             apps/weblibre/lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             apps/weblibre/test/features/geckoview/features/contextual_toolbar
 
+      - name: Check new-tab route and web search formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            apps/weblibre/lib/core/routing/routes.browser.dart \
+            apps/weblibre/lib/core/routing/routes.g.dart \
+            apps/weblibre/lib/features/geckoview/features/search/presentation/screens/search.dart \
+            apps/weblibre/lib/features/web_search/presentation/open_in_new_tab.dart \
+            apps/weblibre/test/features/geckoview/features/browser/new_tab_target_test.dart
+
       - name: Analyze changed Flutter feature code
         working-directory: apps/weblibre
         run: |
@@ -85,6 +94,10 @@ jobs:
             lib/features/geckoview/features/browser/presentation/screens/tab_view.dart \
             lib/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart \
             lib/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart \
+            lib/core/routing/routes.browser.dart \
+            lib/core/routing/routes.g.dart \
+            lib/features/geckoview/features/search/presentation/screens/search.dart \
+            lib/features/web_search/presentation/open_in_new_tab.dart \
             test/features/geckoview/features/browser/new_tab_target_test.dart
           flutter test --no-pub test/features/geckoview/features/browser/new_tab_target_test.dart
 
