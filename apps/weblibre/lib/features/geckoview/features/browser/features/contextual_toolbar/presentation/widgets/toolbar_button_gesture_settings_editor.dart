@@ -224,39 +224,52 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
       }
     }
 
-    final extensionStates = ref.watch(
-      webExtensionsStateProvider(WebExtensionActionType.browser),
-    );
+    // Browser actions and page actions are distinct, and either may be
+    // missing for an extension. Only advertise native actions GeckoView exposes.
+    final extensionsByActionType =
+        <WebExtensionActionType, List<WebExtensionData>>{};
     final selectedExtensionId = selected?.extensionId;
-    final extensions =
-        extensionStates.values
-            .where(
-              (extension) =>
-                  extension.enabled ||
-                  extension.extensionId == selectedExtensionId,
-            )
-            .where(
-              (extension) => matches([
-                extension.title ?? extension.extensionId,
-                extension.extensionId,
-              ]),
-            )
-            .toList()
-          ..sort(
-            (a, b) => (a.title ?? a.extensionId).toLowerCase().compareTo(
-              (b.title ?? b.extensionId).toLowerCase(),
-            ),
-          );
-
-    final showStaleExtension =
-        selectedExtensionId != null &&
-        !extensionStates.containsKey(selectedExtensionId) &&
-        matches([selectedExtensionId]);
+    final selectedActionType =
+        selected?.extensionActionType ?? WebExtensionActionType.browser;
+    var showStaleExtension = false;
+    for (final type in WebExtensionActionType.values) {
+      final extensionStates = ref.watch(webExtensionsStateProvider(type));
+      final extensions =
+          extensionStates.values
+              .where(
+                (extension) =>
+                    extension.enabled ||
+                    (extension.extensionId == selectedExtensionId &&
+                        type == selectedActionType),
+              )
+              .where(
+                (extension) => matches([
+                  extension.title ?? extension.extensionId,
+                  extension.extensionId,
+                  type == WebExtensionActionType.browser
+                      ? 'browser toolbar action'
+                      : 'page action',
+                ]),
+              )
+              .toList()
+            ..sort(
+              (a, b) => (a.title ?? a.extensionId).toLowerCase().compareTo(
+                (b.title ?? b.extensionId).toLowerCase(),
+              ),
+            );
+      extensionsByActionType[type] = extensions;
+      if (type == selectedActionType &&
+          selectedExtensionId != null &&
+          !extensionStates.containsKey(selectedExtensionId) &&
+          matches([selectedExtensionId])) {
+        showStaleExtension = true;
+      }
+    }
     final showUnset = matches(['None', 'No action', 'Do nothing']);
     final hasMatches =
         showUnset ||
         byCategory.values.any((actions) => actions.isNotEmpty) ||
-        extensions.isNotEmpty ||
+        extensionsByActionType.values.any((items) => items.isNotEmpty) ||
         showStaleExtension;
 
     return Padding(
@@ -333,7 +346,10 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                             )),
                           ),
                       ],
-                    if (extensions.isNotEmpty || showStaleExtension) ...[
+                    if (extensionsByActionType.values.any(
+                          (items) => items.isNotEmpty,
+                        ) ||
+                        showStaleExtension) ...[
                       Padding(
                         padding: const EdgeInsets.fromLTRB(24, 12, 24, 4),
                         child: Text(
@@ -344,34 +360,42 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                           ),
                         ),
                       ),
-                      if (showStaleExtension)
+                      if (showStaleExtension && selectedExtensionId != null)
                         ListTile(
                           leading: const Icon(Icons.extension_outlined),
                           title: Text(selectedExtensionId),
-                          subtitle: const Text('Extension is not installed'),
+                          subtitle: const Text('Extension action is unavailable'),
                           selected: true,
                           enabled: false,
                         ),
-                      for (final extension in extensions)
-                        ListTile(
-                          leading: ExtensionBadgeIcon(extension),
-                          title: Text(extension.title ?? extension.extensionId),
-                          subtitle: Text(extension.extensionId),
-                          selected:
-                              selected?.extensionId == extension.extensionId,
-                          trailing:
-                              selected?.extensionId == extension.extensionId
-                              ? Icon(Icons.check, color: colorScheme.primary)
-                              : null,
-                          enabled: extension.enabled,
-                          onTap: extension.enabled
-                              ? () => Navigator.of(context).pop((
-                                  action: ToolbarButtonGestureAction.extension(
-                                    extensionId: extension.extensionId,
-                                  ),
-                                ))
-                              : null,
-                        ),
+                      for (final type in WebExtensionActionType.values)
+                        for (final extension in extensionsByActionType[type]!)
+                          ListTile(
+                            leading: ExtensionBadgeIcon(extension),
+                            title: Text(extension.title ?? extension.extensionId),
+                            subtitle: Text(
+                              type == WebExtensionActionType.browser
+                                  ? 'Browser toolbar action'
+                                  : 'Page action',
+                            ),
+                            selected:
+                                selected?.extensionId == extension.extensionId &&
+                                selectedActionType == type,
+                            trailing:
+                                selected?.extensionId == extension.extensionId &&
+                                selectedActionType == type
+                                ? Icon(Icons.check, color: colorScheme.primary)
+                                : null,
+                            enabled: extension.enabled,
+                            onTap: extension.enabled
+                                ? () => Navigator.of(context).pop((
+                                    action: ToolbarButtonGestureAction.extension(
+                                      extensionId: extension.extensionId,
+                                      actionType: type,
+                                    ),
+                                  ))
+                                : null,
+                          ),
                     ],
                     if (!hasMatches)
                       Padding(
