@@ -247,9 +247,10 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                 (extension) => matches([
                   extension.title ?? extension.extensionId,
                   extension.extensionId,
-                  type == WebExtensionActionType.browser
-                      ? 'browser toolbar action'
-                      : 'page action',
+                  if (type == WebExtensionActionType.browser)
+                    'browser toolbar action'
+                  else
+                    'page action',
                 ]),
               )
               .toList()
