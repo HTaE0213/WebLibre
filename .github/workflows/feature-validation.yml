@@ -51,7 +51,7 @@ jobs:
 
       - name: Verify Dart formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             apps/weblibre/lib/features/addons/presentation/screens/addon_details.dart \
             apps/weblibre/lib/features/addons/presentation/widgets/pinned_addon_bar.dart \
             apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart \
@@ -63,12 +63,16 @@ jobs:
 
       - name: Check new-tab route and web search formatting
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format \
             apps/weblibre/lib/core/routing/routes.browser.dart \
             apps/weblibre/lib/core/routing/routes.g.dart \
             apps/weblibre/lib/features/geckoview/features/search/presentation/screens/search.dart \
             apps/weblibre/lib/features/web_search/presentation/open_in_new_tab.dart \
             apps/weblibre/test/features/geckoview/features/browser/new_tab_target_test.dart
+
+          # Print the canonical formatting diff when any checked-in Dart source
+          # is not formatted, rather than only reporting a filename.
+          git diff --exit-code -- apps/weblibre/lib apps/weblibre/test
 
       - name: Analyze changed Flutter feature code
         working-directory: apps/weblibre
@@ -82,6 +86,8 @@ jobs:
             lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
             lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             test/features/geckoview/features/contextual_toolbar
+
+          git diff --exit-code -- apps/weblibre/lib apps/weblibre/test
 
       - name: Analyze selection-safe page gesture service
         run: |
