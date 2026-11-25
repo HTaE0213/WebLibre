@@ -95,7 +95,6 @@ jobs:
             lib/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart \
             lib/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart \
             lib/core/routing/routes.browser.dart \
-            lib/core/routing/routes.g.dart \
             lib/features/geckoview/features/search/presentation/screens/search.dart \
             lib/features/web_search/presentation/open_in_new_tab.dart \
             test/features/geckoview/features/browser/new_tab_target_test.dart
