@@ -47,7 +47,8 @@ class WebSearchOpenTarget {
     required String sourceTabId,
     this.containerSelection,
     this.parentId,
-  }) : afterTabId = null, splitWithTabId = sourceTabId;
+  }) : afterTabId = null,
+       splitWithTabId = sourceTabId;
 }
 
 abstract interface class WebSearchTabOpener {
