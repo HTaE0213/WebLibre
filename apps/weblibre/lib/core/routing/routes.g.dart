@@ -861,6 +861,7 @@ mixin $SearchRoute on GoRouteData {
         false,
     tabId: state.uri.queryParameters['tab-id'],
     splitWithTabId: state.uri.queryParameters['split-with-tab-id'],
+    afterTabId: state.uri.queryParameters['after-tab-id'],
   );
 
   SearchRoute get _self => this as SearchRoute;
@@ -876,6 +877,7 @@ mixin $SearchRoute on GoRouteData {
       if (_self.tabId != null) 'tab-id': _self.tabId,
       if (_self.splitWithTabId != null)
         'split-with-tab-id': _self.splitWithTabId,
+      if (_self.afterTabId != null) 'after-tab-id': _self.afterTabId,
     },
   );
 
