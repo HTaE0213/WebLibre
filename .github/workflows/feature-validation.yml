@@ -49,6 +49,14 @@ jobs:
       - name: Check localization template
         run: python3 scripts/merge_l10n_arb.py --check
 
+      # Temporary formatting diagnostic; removed when canonical source is committed.
+      - name: Emit Dart formatted new-tab dispatcher
+        run: |
+          dart format apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart
+          echo '===FORMAT_START==='
+          cat apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart
+          echo '===FORMAT_END==='
+
       - name: Verify Dart formatting
         run: |
           dart format --output=none --set-exit-if-changed \
