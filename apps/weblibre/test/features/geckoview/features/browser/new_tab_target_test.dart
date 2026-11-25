@@ -76,7 +76,7 @@ void main() {
     });
 
     test('SearchRoute captures the source tab in its URL', () {
-      final route = SearchRoute(
+      const route = SearchRoute(
         tabType: TabType.regular,
         afterTabId: 'source-tab-42',
       );
