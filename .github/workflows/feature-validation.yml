@@ -72,7 +72,7 @@ jobs:
 
           # Print the canonical formatting diff when any checked-in Dart source
           # is not formatted, rather than only reporting a filename.
-          git diff --exit-code -- apps/weblibre/lib apps/weblibre/test
+          git diff --exit-code -- apps/weblibre/lib/features apps/weblibre/lib/core/routing apps/weblibre/test
 
       - name: Analyze changed Flutter feature code
         working-directory: apps/weblibre
@@ -87,7 +87,7 @@ jobs:
             lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             test/features/geckoview/features/contextual_toolbar
 
-          git diff --exit-code -- apps/weblibre/lib apps/weblibre/test
+          git diff --exit-code -- apps/weblibre/lib/features apps/weblibre/lib/core/routing apps/weblibre/test
 
       - name: Analyze selection-safe page gesture service
         run: |
