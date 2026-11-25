@@ -354,9 +354,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.newTab:
         await _openNewTab(tabId);
       case BrowserAction.newPrivateTab:
-        await _pushLocation(
-          const SearchRoute(tabType: TabType.private).location,
-        );
+        await _openNewTab(tabId, forcedTabType: TabType.private);
       case BrowserAction.closeTab:
         // Confirms the last tab of an isolation group and offers undo, like the
         // tab bar's close button: a stroke or a key press is no less likely to
