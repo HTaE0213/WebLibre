@@ -49,14 +49,6 @@ jobs:
       - name: Check localization template
         run: python3 scripts/merge_l10n_arb.py --check
 
-      # Temporary CI diagnostic; remove after capturing canonical dart format.
-      - name: Emit Dart formatted extension picker
-        run: |
-          dart format apps/weblibre/lib/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_settings_editor.dart
-          echo '===FORMAT_START==='
-          cat apps/weblibre/lib/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_settings_editor.dart
-          echo '===FORMAT_END==='
-
       - name: Verify Dart formatting
         run: |
           dart format --output=none --set-exit-if-changed \
