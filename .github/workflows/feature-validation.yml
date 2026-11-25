@@ -74,6 +74,11 @@ jobs:
             lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             test/features/geckoview/features/contextual_toolbar
 
+      - name: Analyze selection-safe page gesture service
+        run: |
+          cd apps/weblibre
+          flutter analyze --no-pub lib/features/gestures/domain/services/gesture_control.dart
+
       - name: Verify Home/New Tab settings and creation entry points
         run: |
           cd apps/weblibre
