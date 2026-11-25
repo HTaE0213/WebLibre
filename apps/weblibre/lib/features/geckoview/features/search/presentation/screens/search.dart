@@ -1232,6 +1232,7 @@ class SearchScreen extends HookConsumerWidget {
                         selectedContainer,
                       ),
                       parentId: parentId,
+                      afterTabId: afterTabId,
                     );
             },
           ),
