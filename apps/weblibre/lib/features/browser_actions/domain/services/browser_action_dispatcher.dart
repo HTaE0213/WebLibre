@@ -1224,14 +1224,19 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       customNewTabUrl: settings.newTabTargetUrl,
     );
     if (pageUrl != null) {
+      // A child tab keeps the privacy/isolation context of its source.
+      final TabMode newTabMode;
+      if (targetTabType == TabType.child && selectedTabMode != null) {
+        newTabMode = selectedTabMode;
+      } else {
+        newTabMode = TabMode.fromTabType(targetTabType);
+      }
+
       await ref
           .read(tabRepositoryProvider.notifier)
           .addTab(
             url: pageUrl,
-            tabMode: targetTabType == TabType.child &&
-                    selectedTabMode != null
-                ? selectedTabMode
-                : TabMode.fromTabType(targetTabType),
+            tabMode: newTabMode,
             selectTab: true,
             // Only a deliberately created child is linked into the tab
             // hierarchy. Ordinary New Tab actions create adjacent siblings.
