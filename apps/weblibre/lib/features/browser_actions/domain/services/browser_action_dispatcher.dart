@@ -1201,24 +1201,33 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     }
   }
 
-  Future<void> _openNewTab(String? tabId) async {
+  /// Shared entry point for buttons, Android shortcuts and the tab tray.
+  Future<void> openNewTab({TabType? tabType, String? sourceTabId}) async {
+    final tabId = sourceTabId ?? ref.read(selectedTabProvider);
+    await _openNewTab(tabId, forcedTabType: tabType);
+  }
+
+  Future<void> _openNewTab(String? tabId, {TabType? forcedTabType}) async {
     final settings = ref.read(generalSettingsWithDefaultsProvider);
     final selectedTabType = tabId == null
         ? null
         : ref.read(tabStatesProvider)[tabId]?.tabMode.toTabType();
     final targetTabType =
-        selectedTabType ?? settings.effectiveDefaultCreateTabType;
+        forcedTabType ?? selectedTabType ?? settings.effectiveDefaultCreateTabType;
 
-    // A configured website is the New Tab page too. Open it as a real tab,
-    // not inside SearchRoute, and keep it adjacent to the current tab.
-    final homeUrl = settings.homeTarget == HomeTarget.customUrl
-        ? uri_parser.tryParseUrl(settings.homeTargetUrl ?? '')
-        : null;
-    if (homeUrl != null) {
+    // Preserve the original fork's Home-following behavior on upgrade.
+    final pageUrl = switch (settings.newTabTarget) {
+      NewTabTarget.followHome when settings.homeTarget == HomeTarget.customUrl =>
+        uri_parser.tryParseUrl(settings.homeTargetUrl ?? ''),
+      NewTabTarget.customUrl =>
+        uri_parser.tryParseUrl(settings.newTabTargetUrl ?? ''),
+      _ => null,
+    };
+    if (pageUrl != null) {
       await ref
           .read(tabRepositoryProvider.notifier)
           .addTab(
-            url: homeUrl,
+            url: pageUrl,
             tabMode: TabMode.fromTabType(targetTabType),
             selectTab: true,
             parentId: tabId,
