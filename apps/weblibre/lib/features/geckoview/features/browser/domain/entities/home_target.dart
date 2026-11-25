@@ -29,3 +29,12 @@ enum HomeTarget {
   /// Open a configured address.
   customUrl,
 }
+
+/// How the New Tab action chooses its destination, independently of startup.
+///
+/// [followHome] preserves the fork's original behavior on upgrade.
+enum NewTabTarget {
+  followHome,
+  defaultSearch,
+  customUrl,
+}
