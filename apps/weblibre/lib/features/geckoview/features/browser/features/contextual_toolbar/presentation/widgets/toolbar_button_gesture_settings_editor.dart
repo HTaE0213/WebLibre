@@ -26,6 +26,7 @@ import 'package:weblibre/core/design/display_features.dart';
 import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
+import 'package:weblibre/features/geckoview/domain/entities/states/web_extension.dart';
 import 'package:weblibre/features/geckoview/domain/providers/web_extensions_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/extension_badge_icon.dart';
@@ -227,7 +228,7 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
     // Browser actions and page actions are distinct, and either may be
     // missing for an extension. Only advertise native actions GeckoView exposes.
     final extensionsByActionType =
-        <WebExtensionActionType, List<WebExtensionData>>{};
+        <WebExtensionActionType, List<WebExtensionState>>{};
     final selectedExtensionId = selected?.extensionId;
     final selectedActionType =
         selected?.extensionActionType ?? WebExtensionActionType.browser;
@@ -364,7 +365,9 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                         ListTile(
                           leading: const Icon(Icons.extension_outlined),
                           title: Text(selectedExtensionId),
-                          subtitle: const Text('Extension action is unavailable'),
+                          subtitle: const Text(
+                            'Extension action is unavailable',
+                          ),
                           selected: true,
                           enabled: false,
                         ),
@@ -372,27 +375,32 @@ class _ToolbarButtonGestureActionPicker extends HookConsumerWidget {
                         for (final extension in extensionsByActionType[type]!)
                           ListTile(
                             leading: ExtensionBadgeIcon(extension),
-                            title: Text(extension.title ?? extension.extensionId),
+                            title: Text(
+                              extension.title ?? extension.extensionId,
+                            ),
                             subtitle: Text(
                               type == WebExtensionActionType.browser
                                   ? 'Browser toolbar action'
                                   : 'Page action',
                             ),
                             selected:
-                                selected?.extensionId == extension.extensionId &&
+                                selected?.extensionId ==
+                                    extension.extensionId &&
                                 selectedActionType == type,
                             trailing:
-                                selected?.extensionId == extension.extensionId &&
-                                selectedActionType == type
+                                selected?.extensionId ==
+                                        extension.extensionId &&
+                                    selectedActionType == type
                                 ? Icon(Icons.check, color: colorScheme.primary)
                                 : null,
                             enabled: extension.enabled,
                             onTap: extension.enabled
                                 ? () => Navigator.of(context).pop((
-                                    action: ToolbarButtonGestureAction.extension(
-                                      extensionId: extension.extensionId,
-                                      actionType: type,
-                                    ),
+                                    action:
+                                        ToolbarButtonGestureAction.extension(
+                                          extensionId: extension.extensionId,
+                                          actionType: type,
+                                        ),
                                   ))
                                 : null,
                           ),
