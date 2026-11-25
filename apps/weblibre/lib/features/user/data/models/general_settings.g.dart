@@ -59,6 +59,10 @@ abstract class _$GeneralSettingsCWProxy {
 
   GeneralSettings homeTargetUrl(String? homeTargetUrl);
 
+  GeneralSettings newTabTarget(NewTabTarget newTabTarget);
+
+  GeneralSettings newTabTargetUrl(String? newTabTargetUrl);
+
   GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed);
 
   GeneralSettings homeSearchBarPlacement(
@@ -297,6 +301,8 @@ abstract class _$GeneralSettingsCWProxy {
     bool showSearchCloseButton,
     HomeTarget homeTarget,
     String? homeTargetUrl,
+    NewTabTarget newTabTarget,
+    String? newTabTargetUrl,
     bool homeTargetOnLastTabClosed,
     HomeSearchBarPlacement homeSearchBarPlacement,
     SearchFieldPlacement searchFieldPlacement,
@@ -482,6 +488,14 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
   @override
   GeneralSettings homeTargetUrl(String? homeTargetUrl) =>
       call(homeTargetUrl: homeTargetUrl);
+
+  @override
+  GeneralSettings newTabTarget(NewTabTarget newTabTarget) =>
+      call(newTabTarget: newTabTarget);
+
+  @override
+  GeneralSettings newTabTargetUrl(String? newTabTargetUrl) =>
+      call(newTabTargetUrl: newTabTargetUrl);
 
   @override
   GeneralSettings homeTargetOnLastTabClosed(bool homeTargetOnLastTabClosed) =>
@@ -878,6 +892,8 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
     Object? showSearchCloseButton = const $CopyWithPlaceholder(),
     Object? homeTarget = const $CopyWithPlaceholder(),
     Object? homeTargetUrl = const $CopyWithPlaceholder(),
+    Object? newTabTarget = const $CopyWithPlaceholder(),
+    Object? newTabTargetUrl = const $CopyWithPlaceholder(),
     Object? homeTargetOnLastTabClosed = const $CopyWithPlaceholder(),
     Object? homeSearchBarPlacement = const $CopyWithPlaceholder(),
     Object? searchFieldPlacement = const $CopyWithPlaceholder(),
@@ -1092,6 +1108,15 @@ class _$GeneralSettingsCWProxyImpl implements _$GeneralSettingsCWProxy {
           ? _value.homeTargetUrl
           // ignore: cast_nullable_to_non_nullable
           : homeTargetUrl as String?,
+      newTabTarget: newTabTarget == const $CopyWithPlaceholder() ||
+              newTabTarget == null
+          ? _value.newTabTarget
+          // ignore: cast_nullable_to_non_nullable
+          : newTabTarget as NewTabTarget,
+      newTabTargetUrl: newTabTargetUrl == const $CopyWithPlaceholder()
+          ? _value.newTabTargetUrl
+          // ignore: cast_nullable_to_non_nullable
+          : newTabTargetUrl as String?,
       homeTargetOnLastTabClosed:
           homeTargetOnLastTabClosed == const $CopyWithPlaceholder() ||
               homeTargetOnLastTabClosed == null
@@ -1626,6 +1651,11 @@ GeneralSettings _$GeneralSettingsFromJson(
   showSearchCloseButton: json['showSearchCloseButton'] as bool?,
   homeTarget: $enumDecodeNullable(_$HomeTargetEnumMap, json['homeTarget']),
   homeTargetUrl: json['homeTargetUrl'] as String?,
+  newTabTarget: $enumDecodeNullable(
+    _$NewTabTargetEnumMap,
+    json['newTabTarget'],
+  ),
+  newTabTargetUrl: json['newTabTargetUrl'] as String?,
   homeTargetOnLastTabClosed: json['homeTargetOnLastTabClosed'] as bool?,
   homeSearchBarPlacement: $enumDecodeNullable(
     _$HomeSearchBarPlacementEnumMap,
@@ -1831,6 +1861,8 @@ Map<String, dynamic> _$GeneralSettingsToJson(
   'showSearchCloseButton': instance.showSearchCloseButton,
   'homeTarget': _$HomeTargetEnumMap[instance.homeTarget]!,
   'homeTargetUrl': instance.homeTargetUrl,
+  'newTabTarget': _$NewTabTargetEnumMap[instance.newTabTarget]!,
+  'newTabTargetUrl': instance.newTabTargetUrl,
   'homeTargetOnLastTabClosed': instance.homeTargetOnLastTabClosed,
   'homeSearchBarPlacement':
       _$HomeSearchBarPlacementEnumMap[instance.homeSearchBarPlacement]!,
@@ -1971,6 +2003,12 @@ const _$HomeTargetEnumMap = {
   HomeTarget.home: 'home',
   HomeTarget.resumeLastTab: 'resumeLastTab',
   HomeTarget.customUrl: 'customUrl',
+};
+
+const _$NewTabTargetEnumMap = {
+  NewTabTarget.followHome: 'followHome',
+  NewTabTarget.defaultSearch: 'defaultSearch',
+  NewTabTarget.customUrl: 'customUrl',
 };
 
 const _$HomeSearchBarPlacementEnumMap = {

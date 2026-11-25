@@ -354,9 +354,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.newTab:
         await _openNewTab(tabId);
       case BrowserAction.newPrivateTab:
-        await _pushLocation(
-          const SearchRoute(tabType: TabType.private).location,
-        );
+        await _openNewTab(tabId, forcedTabType: TabType.private);
       case BrowserAction.closeTab:
         // Confirms the last tab of an isolation group and offers undo, like the
         // tab bar's close button: a stroke or a key press is no less likely to
@@ -1201,27 +1199,48 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     }
   }
 
-  Future<void> _openNewTab(String? tabId) async {
-    final settings = ref.read(generalSettingsWithDefaultsProvider);
-    final selectedTabType = tabId == null
-        ? null
-        : ref.read(tabStatesProvider)[tabId]?.tabMode.toTabType();
-    final targetTabType =
-        selectedTabType ?? settings.effectiveDefaultCreateTabType;
+  /// Shared entry point for buttons, Android shortcuts and the tab tray.
+  Future<void> openNewTab({TabType? tabType, String? sourceTabId}) async {
+    final tabId = sourceTabId ?? ref.read(selectedTabProvider);
+    await _openNewTab(tabId, forcedTabType: tabType);
+  }
 
-    // A configured website is the New Tab page too. Open it as a real tab,
-    // not inside SearchRoute, and keep it adjacent to the current tab.
-    final homeUrl = settings.homeTarget == HomeTarget.customUrl
-        ? uri_parser.tryParseUrl(settings.homeTargetUrl ?? '')
-        : null;
-    if (homeUrl != null) {
+  Future<void> _openNewTab(String? tabId, {TabType? forcedTabType}) async {
+    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    final selectedTabMode = tabId == null
+        ? null
+        : ref.read(tabStatesProvider)[tabId]?.tabMode;
+    final selectedTabType = selectedTabMode?.toTabType();
+    final targetTabType =
+        forcedTabType ??
+        selectedTabType ??
+        settings.effectiveDefaultCreateTabType;
+
+    // Preserve the original fork's Home-following behavior on upgrade.
+    final pageUrl = resolveNewTabUrl(
+      target: settings.newTabTarget,
+      homeTarget: settings.homeTarget,
+      homeUrl: settings.homeTargetUrl,
+      customNewTabUrl: settings.newTabTargetUrl,
+    );
+    if (pageUrl != null) {
+      // A child tab keeps the privacy/isolation context of its source.
+      final TabMode newTabMode;
+      if (targetTabType == TabType.child && selectedTabMode != null) {
+        newTabMode = selectedTabMode;
+      } else {
+        newTabMode = TabMode.fromTabType(targetTabType);
+      }
+
       await ref
           .read(tabRepositoryProvider.notifier)
           .addTab(
-            url: homeUrl,
-            tabMode: TabMode.fromTabType(targetTabType),
+            url: pageUrl,
+            tabMode: newTabMode,
             selectTab: true,
-            parentId: tabId,
+            // Only a deliberately created child is linked into the tab
+            // hierarchy. Ordinary New Tab actions create adjacent siblings.
+            parentId: targetTabType == TabType.child ? tabId : null,
             afterTabId: tabId,
             containerSelection: tabId == null
                 ? const TabContainerSelection.useSelected()
@@ -1236,7 +1255,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     final router = await ref.read(routerProvider.future);
     if (!ref.mounted) return;
 
-    final route = SearchRoute(tabType: targetTabType);
+    final route = SearchRoute(tabType: targetTabType, afterTabId: tabId);
     await router.push(route.location);
   }
 }

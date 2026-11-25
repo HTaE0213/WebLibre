@@ -25,6 +25,10 @@ class WebSearchOpenTarget {
   final TabContainerSelection? containerSelection;
   final String? parentId;
 
+  /// Captured source tab for results opened from a New Tab search. Results
+  /// opened in a split view never inherit this placement anchor.
+  final String? afterTabId;
+
   /// When set, the result is shown beside this tab in split view instead of
   /// alone (the search screen is picking a split view page).
   final String? splitWithTabId;
@@ -33,6 +37,7 @@ class WebSearchOpenTarget {
     required this.tabMode,
     required TabContainerSelection this.containerSelection,
     this.parentId,
+    this.afterTabId,
   }) : splitWithTabId = null;
 
   /// A result shown beside [sourceTabId]: in [containerSelection] when the
@@ -42,7 +47,8 @@ class WebSearchOpenTarget {
     required String sourceTabId,
     this.containerSelection,
     this.parentId,
-  }) : splitWithTabId = sourceTabId;
+  }) : afterTabId = null,
+       splitWithTabId = sourceTabId;
 }
 
 abstract interface class WebSearchTabOpener {
@@ -88,6 +94,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
             url: uri,
             tabMode: target.tabMode,
             parentId: target.parentId,
+            afterTabId: split == null ? target.afterTabId : null,
             onBackBehavior: ReturnToSearchTabBackBehavior(
               tabType: target.tabMode.toTabType(),
             ),
@@ -149,6 +156,7 @@ final class _DefaultWebSearchTabOpener implements WebSearchTabOpener {
             url: captureUrl,
             tabMode: target.tabMode,
             parentId: target.parentId,
+            afterTabId: split == null ? target.afterTabId : null,
             containerSelection:
                 split?.containerSelection ?? target.containerSelection!,
             onBackBehavior: ReturnToSearchTabBackBehavior(

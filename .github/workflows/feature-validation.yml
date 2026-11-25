@@ -61,6 +61,15 @@ jobs:
             apps/weblibre/lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             apps/weblibre/test/features/geckoview/features/contextual_toolbar
 
+      - name: Check new-tab route and web search formatting
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            apps/weblibre/lib/core/routing/routes.browser.dart \
+            apps/weblibre/lib/core/routing/routes.g.dart \
+            apps/weblibre/lib/features/geckoview/features/search/presentation/screens/search.dart \
+            apps/weblibre/lib/features/web_search/presentation/open_in_new_tab.dart \
+            apps/weblibre/test/features/geckoview/features/browser/new_tab_target_test.dart
+
       - name: Analyze changed Flutter feature code
         working-directory: apps/weblibre
         run: |
@@ -73,6 +82,23 @@ jobs:
             lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
             lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             test/features/geckoview/features/contextual_toolbar
+
+      - name: Verify Home/New Tab settings and creation entry points
+        run: |
+          cd apps/weblibre
+          flutter analyze --no-pub \
+            lib/features/geckoview/features/browser/domain/entities/home_target.dart \
+            lib/features/user/data/models/general_settings.dart \
+            lib/features/settings/presentation/screens/home_settings.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart \
+            lib/features/geckoview/features/browser/presentation/screens/tab_view.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart \
+            lib/core/routing/routes.browser.dart \
+            lib/features/geckoview/features/search/presentation/screens/search.dart \
+            lib/features/web_search/presentation/open_in_new_tab.dart \
+            test/features/geckoview/features/browser/new_tab_target_test.dart
+          flutter test --no-pub test/features/geckoview/features/browser/new_tab_target_test.dart
 
       - name: Run gesture unit/widget tests
         working-directory: apps/weblibre

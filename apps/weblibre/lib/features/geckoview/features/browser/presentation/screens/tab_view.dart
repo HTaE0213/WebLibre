@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_view_controllers.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_grid_view.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/tab_view/tab_list_view.dart';
@@ -128,9 +129,9 @@ class TabViewScreen extends HookConsumerWidget {
                       ),
                       child: FloatingActionButton(
                         onPressed: () async {
-                          await SearchRoute(
-                            tabType: trayNewTabType(ref),
-                          ).push(context);
+                          await ref
+                              .read(browserActionDispatcherProvider.notifier)
+                              .openNewTab(tabType: trayNewTabType(ref));
 
                           if (context.mounted) {
                             const BrowserRoute().go(context);
