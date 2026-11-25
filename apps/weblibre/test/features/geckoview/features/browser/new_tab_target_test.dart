@@ -3,8 +3,12 @@
  * SPDX-License-Identifier: AGPL-3.0-or-later
  */
 import 'package:flutter_test/flutter_test.dart';
+import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/user/data/models/general_settings.dart';
+import 'package:weblibre/features/web_search/presentation/open_in_new_tab.dart';
 
 void main() {
   group('New Tab target', () {
@@ -69,6 +73,37 @@ void main() {
           isNull,
         );
       }
+    });
+
+    test('SearchRoute captures the source tab in its URL', () {
+      final route = SearchRoute(
+        tabType: TabType.regular,
+        afterTabId: 'source-tab-42',
+      );
+
+      final uri = Uri.parse(route.location);
+      expect(uri.queryParameters['after-tab-id'], 'source-tab-42');
+      expect(
+        Uri.parse(
+          const SearchRoute(tabType: TabType.regular).location,
+        ).queryParameters.containsKey('after-tab-id'),
+        isFalse,
+      );
+    });
+
+    test('web search result targets inherit the source tab anchor', () {
+      const target = WebSearchOpenTarget(
+        tabMode: TabMode.regular,
+        containerSelection: TabContainerSelection.useSelected(),
+        afterTabId: 'source-tab-42',
+      );
+      expect(target.afterTabId, 'source-tab-42');
+
+      const splitTarget = WebSearchOpenTarget.splitPartner(
+        tabMode: TabMode.regular,
+        sourceTabId: 'split-source',
+      );
+      expect(splitTarget.afterTabId, isNull);
     });
 
     test('settings JSON round-trip keeps new-tab policy', () {

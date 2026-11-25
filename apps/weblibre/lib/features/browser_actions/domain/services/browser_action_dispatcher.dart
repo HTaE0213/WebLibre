@@ -1207,9 +1207,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
 
   Future<void> _openNewTab(String? tabId, {TabType? forcedTabType}) async {
     final settings = ref.read(generalSettingsWithDefaultsProvider);
-    final selectedTabType = tabId == null
+    final selectedTabMode = tabId == null
         ? null
-        : ref.read(tabStatesProvider)[tabId]?.tabMode.toTabType();
+        : ref.read(tabStatesProvider)[tabId]?.tabMode;
+    final selectedTabType = selectedTabMode?.toTabType();
     final targetTabType =
         forcedTabType ??
         selectedTabType ??
@@ -1227,9 +1228,14 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           .read(tabRepositoryProvider.notifier)
           .addTab(
             url: pageUrl,
-            tabMode: TabMode.fromTabType(targetTabType),
+            tabMode: targetTabType == TabType.child &&
+                    selectedTabMode != null
+                ? selectedTabMode
+                : TabMode.fromTabType(targetTabType),
             selectTab: true,
-            parentId: tabId,
+            // Only a deliberately created child is linked into the tab
+            // hierarchy. Ordinary New Tab actions create adjacent siblings.
+            parentId: targetTabType == TabType.child ? tabId : null,
             afterTabId: tabId,
             containerSelection: tabId == null
                 ? const TabContainerSelection.useSelected()
@@ -1244,7 +1250,10 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     final router = await ref.read(routerProvider.future);
     if (!ref.mounted) return;
 
-    final route = SearchRoute(tabType: targetTabType);
+    final route = SearchRoute(
+      tabType: targetTabType,
+      afterTabId: tabId,
+    );
     await router.push(route.location);
   }
 }
