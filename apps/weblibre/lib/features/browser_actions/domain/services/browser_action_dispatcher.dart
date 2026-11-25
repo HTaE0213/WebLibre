@@ -1216,13 +1216,12 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         forcedTabType ?? selectedTabType ?? settings.effectiveDefaultCreateTabType;
 
     // Preserve the original fork's Home-following behavior on upgrade.
-    final pageUrl = switch (settings.newTabTarget) {
-      NewTabTarget.followHome when settings.homeTarget == HomeTarget.customUrl =>
-        uri_parser.tryParseUrl(settings.homeTargetUrl ?? ''),
-      NewTabTarget.customUrl =>
-        uri_parser.tryParseUrl(settings.newTabTargetUrl ?? ''),
-      _ => null,
-    };
+    final pageUrl = resolveNewTabUrl(
+      target: settings.newTabTarget,
+      homeTarget: settings.homeTarget,
+      homeUrl: settings.homeTargetUrl,
+      customNewTabUrl: settings.newTabTargetUrl,
+    );
     if (pageUrl != null) {
       await ref
           .read(tabRepositoryProvider.notifier)
