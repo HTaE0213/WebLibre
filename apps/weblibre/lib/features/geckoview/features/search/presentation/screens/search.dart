@@ -130,6 +130,10 @@ class SearchScreen extends HookConsumerWidget {
   /// Picker mode: the result is shown beside this tab in split view.
   final String? splitWithTabId;
 
+  /// Position a new tab after the one selected when New Tab was requested.
+  /// Editing an existing tab and split-view selection ignore this anchor.
+  final String? afterTabId;
+
   const SearchScreen({
     super.key,
     required this.initialSearchText,
@@ -138,6 +142,7 @@ class SearchScreen extends HookConsumerWidget {
     this.autoSubmitSearch = false,
     this.tabId,
     this.splitWithTabId,
+    this.afterTabId,
   });
 
   @override
@@ -634,6 +639,7 @@ class SearchScreen extends HookConsumerWidget {
                 url: uri,
                 tabMode: effectiveTabMode,
                 parentId: parentId,
+                afterTabId: splitSourceId == null ? afterTabId : null,
                 launchedFromIntent: launchedFromIntent,
                 // In picker mode the new page is selected only once it is
                 // paired, so the split appears at once.
@@ -1226,6 +1232,7 @@ class SearchScreen extends HookConsumerWidget {
                         selectedContainer,
                       ),
                       parentId: parentId,
+                      afterTabId: afterTabId,
                     );
             },
           ),

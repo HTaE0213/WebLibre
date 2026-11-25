@@ -29,6 +29,7 @@ import 'package:weblibre/features/browser_actions/domain/services/browser_action
 import 'package:weblibre/features/geckoview/domain/providers.dart';
 import 'package:weblibre/features/geckoview/domain/providers/selected_tab.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
+import 'package:weblibre/features/geckoview/domain/providers/text_selection.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_settings.dart';
 import 'package:weblibre/features/gestures/data/models/gesture_stroke.dart';
 import 'package:weblibre/features/gestures/domain/repositories/gesture_settings.dart';
@@ -86,6 +87,9 @@ class GestureControlService extends _$GestureControlService {
   }
 
   Future<void> _dispatch(String gestureKey) async {
+    // A native recognizer may have begun before text selection became active.
+    // Guard the final dispatch as well as disabling recognition below.
+    if (ref.read(textSelectionActiveProvider)) return;
     final settings = ref.read(gestureSettingsWithDefaultsProvider);
     final action = settings.bindings[gestureKey];
     if (action == null) return;
@@ -136,6 +140,10 @@ bool gestureSiteExcluded(Ref ref) {
 GestureConfig gestureNativeConfig(Ref ref) {
   final settings = ref.watch(gestureSettingsWithDefaultsProvider);
   final excluded = ref.watch(gestureSiteExcludedProvider);
+  // Handles are part of the native compositor, not a Flutter drag target.
+  // Disable the entire recognizer while a selection is active (and during the
+  // native post-selection grace window) to avoid stealing handle drags.
+  final selectingText = ref.watch(textSelectionActiveProvider);
 
   // Recognize as many fingers as any bound gesture requires, so multi-finger
   // bindings work without a separate finger setting.
@@ -144,7 +152,7 @@ GestureConfig gestureNativeConfig(Ref ref) {
       .fold(settings.maxFingers, max);
 
   return GestureConfig(
-    enabled: settings.effectiveEnabled && !excluded,
+    enabled: settings.effectiveEnabled && !excluded && !selectingText,
     strokeSize: settings.strokeSize,
     timeoutMs: settings.timeoutMs,
     maxFingers: requiredFingers,
@@ -170,6 +178,6 @@ String? gestureFeedbackProgress(Ref ref) {
   final showFeedback = ref.watch(
     gestureSettingsWithDefaultsProvider.select((s) => s.showFeedback),
   );
-  if (!showFeedback) return null;
+  if (!showFeedback || ref.watch(textSelectionActiveProvider)) return null;
   return ref.watch(gestureProgressProvider).asData?.value;
 }

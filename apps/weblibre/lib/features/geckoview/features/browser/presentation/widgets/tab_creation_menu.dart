@@ -22,6 +22,7 @@ import 'package:flutter_material_design_icons/flutter_material_design_icons.dart
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/user/domain/repositories/general_settings.dart';
 import 'package:weblibre/l10n/generated/app_localizations.dart';
 
@@ -57,7 +58,9 @@ class TabCreationMenu extends HookConsumerWidget {
       menuChildren: [
         MenuItemButton(
           onPressed: () async {
-            await const SearchRoute(tabType: TabType.regular).push(context);
+            await ref
+                .read(browserActionDispatcherProvider.notifier)
+                .openNewTab(tabType: TabType.regular);
           },
           leadingIcon: const Icon(MdiIcons.tab),
           child: Text(l10n.browser_menuAddRegularTab),
@@ -65,14 +68,18 @@ class TabCreationMenu extends HookConsumerWidget {
         if (createChildTabsOption)
           MenuItemButton(
             onPressed: () async {
-              await const SearchRoute(tabType: TabType.child).push(context);
+              await ref
+                .read(browserActionDispatcherProvider.notifier)
+                .openNewTab(tabType: TabType.child);
             },
             leadingIcon: const Icon(MdiIcons.fileTree),
             child: Text(l10n.browser_menuAddChildTab),
           ),
         MenuItemButton(
           onPressed: () async {
-            await const SearchRoute(tabType: TabType.private).push(context);
+            await ref
+                .read(browserActionDispatcherProvider.notifier)
+                .openNewTab(tabType: TabType.private);
           },
           leadingIcon: Icon(
             MdiIcons.dominoMask,
@@ -83,7 +90,9 @@ class TabCreationMenu extends HookConsumerWidget {
         if (showIsolatedTabUi)
           MenuItemButton(
             onPressed: () async {
-              await const SearchRoute(tabType: TabType.isolated).push(context);
+              await ref
+                .read(browserActionDispatcherProvider.notifier)
+                .openNewTab(tabType: TabType.isolated);
             },
             leadingIcon: Icon(
               MdiIcons.snowflake,

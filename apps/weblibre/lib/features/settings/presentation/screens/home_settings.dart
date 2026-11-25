@@ -50,6 +50,12 @@ List<SettingsSectionDefinition> homeSettingsSections(BuildContext context) {
           child: const _HomeTargetTile(),
         ),
         SettingsEntryDefinition(
+          title: l10n.settings_newTabTargetTitle,
+          subtitle: l10n.settings_newTabTargetSubtitle,
+          keywords: settingsKeywords(l10n.settings_newTabTargetTitle),
+          child: const _NewTabTargetTile(),
+        ),
+        SettingsEntryDefinition(
           title: l10n.settings_applyWhenLastTabClosesTitle,
           subtitle: l10n.settings_indexHomeTargetOnLastTabClosedSubtitle,
           keywords: settingsKeywords(
@@ -205,6 +211,88 @@ class _HomeTargetTile extends HookConsumerWidget {
                   return null;
                 },
                 onFieldSubmitted: (_) => unawaited(saveUrlIfChanged()),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// New Tab is separate from Home, including an explicit standard-search mode.
+class _NewTabTargetTile extends HookConsumerWidget {
+  const _NewTabTargetTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(storedGeneralSettingsProvider);
+    final l10n = AppLocalizations.of(context);
+    final controller = useTextEditingController(
+      text: settings.newTabTargetUrl ?? '',
+    );
+
+    Future<void> save(GeneralSettings Function(GeneralSettings) update) =>
+        ref.read(saveGeneralSettingsControllerProvider.notifier).save(update);
+
+    Future<void> saveUrl() async {
+      final url = controller.text.trim();
+      if (url == (settings.newTabTargetUrl ?? '')) return;
+      if (url.isNotEmpty && uri_parser.tryParseUrl(url) == null) return;
+      await save((s) => s.copyWith.newTabTargetUrl(url));
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        RadioGroup<NewTabTarget>(
+          groupValue: settings.newTabTarget,
+          onChanged: (mode) async {
+            if (mode != null) {
+              await save((s) => s.copyWith.newTabTarget(mode));
+            }
+          },
+          child: Column(
+            children: [
+              RadioListTile<NewTabTarget>(
+                value: NewTabTarget.followHome,
+                title: Text(l10n.settings_newTabTargetFollowHome),
+              ),
+              RadioListTile<NewTabTarget>(
+                value: NewTabTarget.defaultSearch,
+                title: Text(l10n.settings_newTabTargetDefaultSearch),
+              ),
+              RadioListTile<NewTabTarget>(
+                value: NewTabTarget.customUrl,
+                title: Text(l10n.settings_newTabTargetCustomUrl),
+              ),
+            ],
+          ),
+        ),
+        if (settings.newTabTarget == NewTabTarget.customUrl)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Focus(
+              onFocusChange: (hasFocus) {
+                if (!hasFocus) unawaited(saveUrl());
+              },
+              child: TextFormField(
+                controller: controller,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                keyboardType: TextInputType.url,
+                decoration: InputDecoration(
+                  labelText: l10n.settings_addressFieldLabel,
+                  hintText: 'https://example.com',
+                  border: const OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  final url = value?.trim() ?? '';
+                  if (url.isEmpty) return l10n.settings_homeTargetUrlEmptyError;
+                  if (uri_parser.tryParseUrl(url) == null) {
+                    return l10n.settings_homeTargetUrlInvalidError;
+                  }
+                  return null;
+                },
+                onFieldSubmitted: (_) => unawaited(saveUrl()),
               ),
             ),
           ),

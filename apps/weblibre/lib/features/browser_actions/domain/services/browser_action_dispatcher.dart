@@ -43,7 +43,9 @@ import 'package:weblibre/features/geckoview/domain/providers/tab_session.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/bookmarks/domain/repositories/bookmarks.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/controllers/home_target_controller.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/font_size_constants.dart';
+import 'package:weblibre/features/geckoview/features/browser/domain/entities/home_target.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_list_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/providers.dart';
@@ -62,6 +64,7 @@ import 'package:weblibre/features/geckoview/features/readerview/presentation/con
 import 'package:weblibre/features/geckoview/features/split_view/domain/entities/split_pair.dart';
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/split_view/presentation/utils/split_view_actions.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_cycle.dart';
 import 'package:weblibre/features/geckoview/features/tabs/domain/entities/container_freeze.dart';
@@ -86,6 +89,7 @@ import 'package:weblibre/features/web_search/domain/controllers/sandbox_capture_
 import 'package:weblibre/presentation/widgets/reveal_feature.dart';
 import 'package:weblibre/presentation/widgets/speech_to_text_button.dart';
 import 'package:weblibre/utils/move_to_background.dart';
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
 
 part 'browser_action_dispatcher.g.dart';
 
@@ -350,9 +354,7 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
       case BrowserAction.newTab:
         await _openNewTab(tabId);
       case BrowserAction.newPrivateTab:
-        await _pushLocation(
-          const SearchRoute(tabType: TabType.private).location,
-        );
+        await _openNewTab(tabId, forcedTabType: TabType.private);
       case BrowserAction.closeTab:
         // Confirms the last tab of an isolation group and offers undo, like the
         // tab bar's close button: a stroke or a key press is no less likely to
@@ -489,7 +491,26 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
           await showBrowserMenuSheet(context);
         }
       case BrowserAction.showHome:
-        ref.read(forceBrowserHomeProvider.notifier).request();
+        final settings = ref.read(generalSettingsWithDefaultsProvider);
+        final homeUrl = settings.homeTarget == HomeTarget.customUrl
+            ? uri_parser.tryParseUrl(settings.homeTargetUrl ?? '')
+            : null;
+
+        if (homeUrl != null) {
+          if (tabId != null) {
+            // Reveal the tab even when the internal home surface was forced.
+            ref.read(forceBrowserHomeProvider.notifier).clear();
+            await ref
+                .read(tabSessionProvider(tabId: tabId).notifier)
+                .loadUrl(url: homeUrl);
+          } else {
+            // With no selected tab, let the home-target controller create the
+            // configured page using its normal startup/container handling.
+            await ref.read(homeTargetControllerProvider.notifier).applyTarget();
+          }
+        } else {
+          ref.read(forceBrowserHomeProvider.notifier).request();
+        }
       case BrowserAction.toggleTabBar:
         // Keyed by the nullable tab id: the home screen, with no tab selected,
         // has a tab bar too.
@@ -1178,18 +1199,63 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
     }
   }
 
-  Future<void> _openNewTab(String? tabId) async {
+  /// Shared entry point for buttons, Android shortcuts and the tab tray.
+  Future<void> openNewTab({TabType? tabType, String? sourceTabId}) async {
+    final tabId = sourceTabId ?? ref.read(selectedTabProvider);
+    await _openNewTab(tabId, forcedTabType: tabType);
+  }
+
+  Future<void> _openNewTab(String? tabId, {TabType? forcedTabType}) async {
+    final settings = ref.read(generalSettingsWithDefaultsProvider);
+    final selectedTabMode = tabId == null
+        ? null
+        : ref.read(tabStatesProvider)[tabId]?.tabMode;
+    final selectedTabType = selectedTabMode?.toTabType();
+    final targetTabType =
+        forcedTabType ??
+        selectedTabType ??
+        settings.effectiveDefaultCreateTabType;
+
+    // Preserve the original fork's Home-following behavior on upgrade.
+    final pageUrl = resolveNewTabUrl(
+      target: settings.newTabTarget,
+      homeTarget: settings.homeTarget,
+      homeUrl: settings.homeTargetUrl,
+      customNewTabUrl: settings.newTabTargetUrl,
+    );
+    if (pageUrl != null) {
+      // A child tab keeps the privacy/isolation context of its source.
+      final TabMode newTabMode;
+      if (targetTabType == TabType.child && selectedTabMode != null) {
+        newTabMode = selectedTabMode;
+      } else {
+        newTabMode = TabMode.fromTabType(targetTabType);
+      }
+
+      await ref
+          .read(tabRepositoryProvider.notifier)
+          .addTab(
+            url: pageUrl,
+            tabMode: newTabMode,
+            selectTab: true,
+            // Only a deliberately created child is linked into the tab
+            // hierarchy. Ordinary New Tab actions create adjacent siblings.
+            parentId: targetTabType == TabType.child ? tabId : null,
+            afterTabId: tabId,
+            containerSelection: tabId == null
+                ? const TabContainerSelection.useSelected()
+                : TabContainerSelection.openedFrom(tabId),
+            childPlacement: ChildTabPlacement.afterParent,
+            // This is a browser-owned URL, not a link from the opener.
+            parentIsReferrer: false,
+          );
+      return;
+    }
+
     final router = await ref.read(routerProvider.future);
     if (!ref.mounted) return;
 
-    final settings = ref.read(generalSettingsWithDefaultsProvider);
-    final selectedTabType = tabId == null
-        ? null
-        : ref.read(tabStatesProvider)[tabId]?.tabMode.toTabType();
-
-    final route = SearchRoute(
-      tabType: selectedTabType ?? settings.effectiveDefaultCreateTabType,
-    );
+    final route = SearchRoute(tabType: targetTabType, afterTabId: tabId);
     await router.push(route.location);
   }
 }

@@ -150,6 +150,8 @@ const generalSettingColumnTypes = <String, DriftSqlType>{
   'showSearchCloseButton': DriftSqlType.bool,
   'homeTarget': DriftSqlType.string,
   'homeTargetUrl': DriftSqlType.string,
+  'newTabTarget': DriftSqlType.string,
+  'newTabTargetUrl': DriftSqlType.string,
   'homeTargetOnLastTabClosed': DriftSqlType.bool,
   'homeSearchBarPlacement': DriftSqlType.string,
   'searchFieldPlacement': DriftSqlType.string,

@@ -24,9 +24,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/services/toolbar_button_resolution.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/models/contextual_toolbar_scope.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_gesture_actions.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_surface.dart';
 import 'package:weblibre/features/user/data/database/definitions.drift.dart'
     show ToolbarButtonConfig;
 
@@ -41,8 +44,9 @@ Widget buildResolvedToolbarButton(
   BuildContext context,
   WidgetRef ref,
   ContextualToolbarButtonResolution button,
-  Map<String, ToolbarButtonConfig> configById,
-) {
+  Map<String, ToolbarButtonConfig> configById, {
+  bool enableSwipe = true,
+}) {
   final def = toolbarButtonRegistryById[button.buttonId];
   if (def == null) return const SizedBox.shrink();
 
@@ -54,13 +58,35 @@ Widget buildResolvedToolbarButton(
   final longPressAction = scope.isPreview
       ? null
       : configById[button.buttonId]?.longPressAction;
-  if (longPressAction == null) return built;
+  final withLongPress = longPressAction == null
+      ? built
+      : ToolbarLongPressOverride(
+          onLongPress: () => unawaited(
+            ref
+                .read(browserActionDispatcherProvider.notifier)
+                .run(longPressAction),
+          ),
+          child: built,
+        );
 
-  return ToolbarLongPressOverride(
-    onLongPress: () => unawaited(
-      ref.read(browserActionDispatcherProvider.notifier).run(longPressAction),
-    ),
-    child: built,
+  if (scope.isPreview) return withLongPress;
+
+  final bindings = ref.watch(toolbarButtonGestureBindingsProvider);
+  final buttonBindings =
+      bindings[toolbarButtonGestureTargetId(button.buttonId)] ?? const {};
+  final swipeUp = buttonBindings[ToolbarButtonGestureDirection.swipeUp.name];
+  final swipeDown =
+      buttonBindings[ToolbarButtonGestureDirection.swipeDown.name];
+
+  return ToolbarButtonGestureSurface(
+    enabled: enableSwipe,
+    onSwipeUp: swipeUp == null
+        ? null
+        : () => runToolbarButtonGestureAction(ref, swipeUp),
+    onSwipeDown: swipeDown == null
+        ? null
+        : () => runToolbarButtonGestureAction(ref, swipeDown),
+    child: withLongPress,
   );
 }
 

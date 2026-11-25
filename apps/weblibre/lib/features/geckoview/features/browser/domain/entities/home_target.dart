@@ -18,6 +18,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import 'package:weblibre/utils/uri_parser.dart' as uri_parser;
+
 /// What the browser lands on when there is no tab to show.
 enum HomeTarget {
   /// Show the home surface. The default, and what the browser has always done.
@@ -28,4 +30,30 @@ enum HomeTarget {
 
   /// Open a configured address.
   customUrl,
+}
+
+/// How the New Tab action chooses its destination, independently of startup.
+///
+/// [followHome] preserves the fork's original behavior on upgrade.
+enum NewTabTarget {
+  followHome,
+  defaultSearch,
+  customUrl,
+}
+
+/// Returns the New Tab destination; null means WebLibre's search/new-tab UI.
+/// Kept pure to cover upgrades, independent URLs and invalid addresses in tests.
+Uri? resolveNewTabUrl({
+  required NewTabTarget target,
+  required HomeTarget homeTarget,
+  required String? homeUrl,
+  required String? customNewTabUrl,
+}) {
+  final url = switch (target) {
+    NewTabTarget.followHome when homeTarget == HomeTarget.customUrl => homeUrl,
+    NewTabTarget.customUrl => customNewTabUrl,
+    _ => null,
+  };
+  if (url == null || url.trim().isEmpty) return null;
+  return uri_parser.tryParseUrl(url);
 }

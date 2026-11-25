@@ -35,6 +35,7 @@ import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_links/domain/services/app_link_policy_replication.dart';
 import 'package:weblibre/features/bangs/data/models/web_search_bang.dart';
 import 'package:weblibre/features/bangs/domain/providers/bangs.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
 import 'package:weblibre/features/geckoview/domain/entities/tab_container_selection.dart';
 import 'package:weblibre/features/geckoview/domain/providers.dart';
@@ -487,25 +488,15 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             if (type == 'new_tab') {
                               lastAction = DateTime.now();
 
-                              final router = await ref.read(
-                                routerProvider.future,
-                              );
-                              const route = SearchRoute(
-                                tabType: TabType.regular,
-                              );
-
-                              await router.push(route.location);
+                              await ref
+                                  .read(browserActionDispatcherProvider.notifier)
+                                  .openNewTab(tabType: TabType.regular);
                             } else if (type == 'new_private_tab') {
                               lastAction = DateTime.now();
 
-                              final router = await ref.read(
-                                routerProvider.future,
-                              );
-                              const route = SearchRoute(
-                                tabType: TabType.private,
-                              );
-
-                              await router.push(route.location);
+                              await ref
+                                  .read(browserActionDispatcherProvider.notifier)
+                                  .openNewTab(tabType: TabType.private);
                             } else if (type == 'new_isolated_tab') {
                               final settings = ref.read(
                                 generalSettingsWithDefaultsProvider,
@@ -516,14 +507,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
                               lastAction = DateTime.now();
 
-                              final router = await ref.read(
-                                routerProvider.future,
-                              );
-                              const route = SearchRoute(
-                                tabType: TabType.isolated,
-                              );
-
-                              await router.push(route.location);
+                              await ref
+                                  .read(browserActionDispatcherProvider.notifier)
+                                  .openNewTab(tabType: TabType.isolated);
                             } else {
                               throw UnimplementedError(
                                 'Unknown quick action shortcut type',

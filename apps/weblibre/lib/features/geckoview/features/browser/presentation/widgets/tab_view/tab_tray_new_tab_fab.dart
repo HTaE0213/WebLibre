@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/routing/routes.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/tab_view_filter_options.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/controllers/tab_type_filter_bar.dart';
@@ -130,7 +131,9 @@ class TabTrayNewTabFab extends HookConsumerWidget {
                 pick.request.onNewTab();
                 return;
               }
-              await SearchRoute(tabType: trayNewTabType(ref)).push(context);
+              await ref
+                   .read(browserActionDispatcherProvider.notifier)
+                   .openNewTab(tabType: trayNewTabType(ref));
 
               // A search usually closes the tray, and this button with it.
               if (context.mounted) onClose();

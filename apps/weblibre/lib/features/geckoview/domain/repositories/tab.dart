@@ -54,6 +54,7 @@ import 'package:weblibre/features/geckoview/features/split_view/domain/entities/
 import 'package:weblibre/features/geckoview/features/split_view/domain/providers/split_view.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/daos/tab.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/database/database.dart';
+import 'package:weblibre/features/geckoview/features/tabs/data/entities/child_tab_placement.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/isolation_context.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_mode.dart';
 import 'package:weblibre/features/geckoview/features/tabs/data/entities/tab_source.dart';
@@ -380,12 +381,14 @@ class TabRepository extends _$TabRepository {
     required bool selectTab,
     bool startLoading = true,
     String? parentId,
+    String? afterTabId,
     LoadUrlFlags flags = LoadUrlFlags.NONE,
     Source source = Internal.newTab,
     HistoryMetadataKey? historyMetadata,
     Map<String, String>? additionalHeaders,
     TabContainerSelection containerSelection =
         const TabContainerSelection.useSelected(),
+    ChildTabPlacement? childPlacement,
     bool launchedFromIntent = false,
     TabBackBehavior? onBackBehavior,
     void Function(String tabId)? onCreated,
@@ -468,12 +471,13 @@ class TabRepository extends _$TabRepository {
             return tabId;
           },
           parentId: Value(validatedParentId),
+          afterTabId: Value(afterTabId),
           containerId: Value(container?.id),
           url: Value(url),
           tabMode: Value(tabMode),
-          childPlacement: ref
-              .read(generalSettingsWithDefaultsProvider)
-              .childTabPlacement,
+          childPlacement:
+              childPlacement ??
+              ref.read(generalSettingsWithDefaultsProvider).childTabPlacement,
         );
 
         if (launchedFromIntent) {

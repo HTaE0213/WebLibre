@@ -29,12 +29,14 @@ import 'package:weblibre/features/browser_actions/data/models/browser_action.dar
 import 'package:weblibre/features/browser_actions/domain/entities/browser_action_policy.dart';
 import 'package:weblibre/features/browser_actions/presentation/utils/browser_action_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_configs.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/data/providers/toolbar_button_gesture_bindings.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_button_id.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_config_location.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/domain/entities/toolbar_fallback_choice.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/toolbar_button_registry.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/utils/toolbar_button_id_l10n.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/configured_toolbar_buttons_preview.dart';
+import 'package:weblibre/features/geckoview/features/browser/features/contextual_toolbar/presentation/widgets/toolbar_button_gesture_settings_editor.dart';
 import 'package:weblibre/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart';
 import 'package:weblibre/features/gestures/presentation/widgets/gesture_action_picker.dart';
 import 'package:weblibre/features/settings/domain/hidden_settings.dart';
@@ -458,6 +460,26 @@ class _ToolbarButtonConfigTile extends HookConsumerWidget {
                           ),
                         ),
                       ),
+                      if (location == ToolbarConfigLocation.contextual)
+                        HiddenFeatureGate.feature(
+                          FeatureId.layoutContextualToolbarAdvanced,
+                          hiddenSettings:
+                              (ref
+                                      .watch(
+                                        toolbarButtonGestureBindingsProvider,
+                                      )[toolbarButtonGestureTargetId(
+                                        config.buttonId,
+                                      )]
+                                      ?.isNotEmpty ??
+                                  false)
+                              ? const [HiddenSetting.toolbarButtons]
+                              : const [],
+                          child: ToolbarButtonGestureSettingsEditor(
+                            targetId: toolbarButtonGestureTargetId(
+                              config.buttonId,
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

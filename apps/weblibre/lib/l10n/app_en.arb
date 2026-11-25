@@ -16116,6 +16116,26 @@
       }
     }
   },
+  "settings_newTabTargetTitle": "New Tab page",
+  "@settings_newTabTargetTitle": {
+    "description": "New Tab page"
+  },
+  "settings_newTabTargetSubtitle": "Choose a different page for new tabs without changing the Home button or startup.",
+  "@settings_newTabTargetSubtitle": {
+    "description": "Choose a different page for new tabs without changing the Home button or startup."
+  },
+  "settings_newTabTargetFollowHome": "Same as Home",
+  "@settings_newTabTargetFollowHome": {
+    "description": "Same as Home"
+  },
+  "settings_newTabTargetDefaultSearch": "WebLibre search",
+  "@settings_newTabTargetDefaultSearch": {
+    "description": "WebLibre search"
+  },
+  "settings_newTabTargetCustomUrl": "Custom new-tab address",
+  "@settings_newTabTargetCustomUrl": {
+    "description": "Custom new-tab address"
+  },
   "smallWeb_sheetTitle": "Small Web",
   "@smallWeb_sheetTitle": {
     "description": "Title of the Small Web panel. The \"small web\" is personal, non-commercial websites and blogs; this feature opens random pages from them. Keep the term consistent throughout."

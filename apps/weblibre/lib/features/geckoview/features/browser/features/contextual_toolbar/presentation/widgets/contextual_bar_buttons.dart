@@ -23,8 +23,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:weblibre/core/design/app_colors.dart';
 import 'package:weblibre/core/routing/routes.dart';
 import 'package:weblibre/features/app_update/presentation/widgets/update_menu_row.dart';
+import 'package:weblibre/features/browser_actions/data/models/browser_action.dart';
+import 'package:weblibre/features/browser_actions/domain/services/browser_action_dispatcher.dart';
 import 'package:weblibre/features/geckoview/domain/controllers/bottom_sheet.dart';
-import 'package:weblibre/features/geckoview/domain/providers/tab_state.dart';
 import 'package:weblibre/features/geckoview/domain/repositories/tab.dart';
 import 'package:weblibre/features/geckoview/features/browser/domain/entities/sheet.dart';
 import 'package:weblibre/features/geckoview/features/browser/features/menu/presentation/widgets/browser_menu_sheet.dart';
@@ -121,13 +122,9 @@ class AddTabButton extends HookConsumerWidget {
       controller: tabMenuController,
       child: AddTabButtonView(
         onPressed: () async {
-          final settings = ref.read(generalSettingsWithDefaultsProvider);
-
-          await SearchRoute(
-            tabType:
-                ref.read(selectedTabTypeProvider) ??
-                settings.effectiveDefaultCreateTabType,
-          ).push(context);
+          await ref
+              .read(browserActionDispatcherProvider.notifier)
+              .run(BrowserAction.newTab);
 
           if (context.mounted) {
             const BrowserRoute().go(context);
