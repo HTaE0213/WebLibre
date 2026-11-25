@@ -49,14 +49,6 @@ jobs:
       - name: Check localization template
         run: python3 scripts/merge_l10n_arb.py --check
 
-      # Temporary formatting diagnostic; removed when canonical source is committed.
-      - name: Emit Dart formatted new-tab dispatcher
-        run: |
-          dart format apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart
-          echo '===FORMAT_START==='
-          cat apps/weblibre/lib/features/browser_actions/domain/services/browser_action_dispatcher.dart
-          echo '===FORMAT_END==='
-
       - name: Verify Dart formatting
         run: |
           dart format --output=none --set-exit-if-changed \
@@ -81,6 +73,20 @@ jobs:
             lib/features/geckoview/features/browser/presentation/widgets/browser_modules/bottom_app_bar.dart \
             lib/features/settings/presentation/screens/contextual_toolbar_settings.dart \
             test/features/geckoview/features/contextual_toolbar
+
+      - name: Verify Home/New Tab settings and creation entry points
+        run: |
+          cd apps/weblibre
+          flutter analyze --no-pub \
+            lib/features/geckoview/features/browser/domain/entities/home_target.dart \
+            lib/features/user/data/models/general_settings.dart \
+            lib/features/settings/presentation/screens/home_settings.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/tab_creation_menu.dart \
+            lib/features/geckoview/features/browser/presentation/screens/tab_view.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/tab_view/tab_tray_new_tab_fab.dart \
+            lib/features/geckoview/features/browser/presentation/widgets/browser_modules/browser_view.dart \
+            test/features/geckoview/features/browser/new_tab_target_test.dart
+          flutter test --no-pub test/features/geckoview/features/browser/new_tab_target_test.dart
 
       - name: Run gesture unit/widget tests
         working-directory: apps/weblibre
