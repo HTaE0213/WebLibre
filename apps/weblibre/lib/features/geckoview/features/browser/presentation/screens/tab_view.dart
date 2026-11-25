@@ -77,34 +77,43 @@ class TabViewScreen extends HookConsumerWidget {
             // the tray's sheet.
             top: false,
             bottom: false,
-            child: TabTrayGestures(
-              child: switch (effectiveTabsViewMode) {
-                TabsViewMode.list => ViewTabListWidget(
-                  key: ValueKey(tabsReorderable),
-                  scrollController: scrollController,
-                  tabsReorderable: tabsReorderable,
-                  showNewTabFab: false,
-                  onClose: () {
-                    const BrowserRoute().go(context);
-                  },
-                ),
-                TabsViewMode.grid => ViewTabGridWidget(
-                  key: ValueKey(tabsReorderable),
-                  scrollController: scrollController,
-                  tabsReorderable: tabsReorderable,
-                  showNewTabFab: false,
-                  onClose: () {
-                    const BrowserRoute().go(context);
-                  },
-                ),
-                TabsViewMode.tree => ViewTabTreesWidget(
-                  scrollController: scrollController,
-                  showNewTabFab: false,
-                  onClose: () {
-                    const BrowserRoute().go(context);
-                  },
-                ),
-              },
+            // Draggable fast-scroll thumb for long tab lists. It controls the
+            // existing tray ScrollController without changing the tab gestures.
+            child: Scrollbar(
+              controller: scrollController,
+              thumbVisibility: true,
+              interactive: true,
+              thickness: 8,
+              radius: const Radius.circular(4),
+              child: TabTrayGestures(
+                child: switch (effectiveTabsViewMode) {
+                  TabsViewMode.list => ViewTabListWidget(
+                    key: ValueKey(tabsReorderable),
+                    scrollController: scrollController,
+                    tabsReorderable: tabsReorderable,
+                    showNewTabFab: false,
+                    onClose: () {
+                      const BrowserRoute().go(context);
+                    },
+                  ),
+                  TabsViewMode.grid => ViewTabGridWidget(
+                    key: ValueKey(tabsReorderable),
+                    scrollController: scrollController,
+                    tabsReorderable: tabsReorderable,
+                    showNewTabFab: false,
+                    onClose: () {
+                      const BrowserRoute().go(context);
+                    },
+                  ),
+                  TabsViewMode.tree => ViewTabTreesWidget(
+                    scrollController: scrollController,
+                    showNewTabFab: false,
+                    onClose: () {
+                      const BrowserRoute().go(context);
+                    },
+                  ),
+                },
+              ),
             ),
           ),
           floatingActionButton: isSyncedScope
