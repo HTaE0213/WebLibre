@@ -1211,7 +1211,9 @@ class BrowserActionDispatcher extends _$BrowserActionDispatcher {
         ? null
         : ref.read(tabStatesProvider)[tabId]?.tabMode.toTabType();
     final targetTabType =
-        forcedTabType ?? selectedTabType ?? settings.effectiveDefaultCreateTabType;
+        forcedTabType ??
+        selectedTabType ??
+        settings.effectiveDefaultCreateTabType;
 
     // Preserve the original fork's Home-following behavior on upgrade.
     final pageUrl = resolveNewTabUrl(
