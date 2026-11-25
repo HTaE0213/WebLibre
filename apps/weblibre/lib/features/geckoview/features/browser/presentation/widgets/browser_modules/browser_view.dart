@@ -494,14 +494,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
                             } else if (type == 'new_private_tab') {
                               lastAction = DateTime.now();
 
-                              final router = await ref.read(
-                                routerProvider.future,
-                              );
-                              const route = SearchRoute(
-                                tabType: TabType.private,
-                              );
-
-                              await router.push(route.location);
+                              await ref
+                                  .read(browserActionDispatcherProvider.notifier)
+                                  .openNewTab(tabType: TabType.private);
                             } else if (type == 'new_isolated_tab') {
                               final settings = ref.read(
                                 generalSettingsWithDefaultsProvider,
@@ -512,14 +507,9 @@ class _BrowserViewState extends ConsumerState<BrowserView>
 
                               lastAction = DateTime.now();
 
-                              final router = await ref.read(
-                                routerProvider.future,
-                              );
-                              const route = SearchRoute(
-                                tabType: TabType.isolated,
-                              );
-
-                              await router.push(route.location);
+                              await ref
+                                  .read(browserActionDispatcherProvider.notifier)
+                                  .openNewTab(tabType: TabType.isolated);
                             } else {
                               throw UnimplementedError(
                                 'Unknown quick action shortcut type',
